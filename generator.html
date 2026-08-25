@@ -1,0 +1,2548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>DevSoft Pulse — Generator</title>
+<style>
+:root{
+  --bg:#0d0f14; --surface:#161923; --surface2:#1e2230; --border:#2a2f42;
+  --text:#eef0f6; --text-dim:#9aa0b4; --accent:#00e5ff; --accent2:#ff2ec4;
+  --good:#33d17a; --bad:#ff5470; --warn:#ffcc33;
+  --radius:12px; --font-display:'Rajdhani',sans-serif; --font-body:'Rajdhani',sans-serif;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;}
+body{padding-bottom:60px;}
+h1,h2,h3{font-family:var(--font-display); margin:0; letter-spacing:.5px;}
+::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* ===== HEADER ===== */
+.topbar{position:sticky; top:0; z-index:50; background:var(--bg); border-bottom:1px solid var(--border);
+  padding:14px 16px 10px; display:flex; align-items:center; justify-content:space-between;}
+.brand{display:flex; flex-direction:column; line-height:1.1;}
+.brand .logo{font-size:20px; font-weight:800; color:var(--accent); text-shadow:0 0 12px var(--accent);}
+.brand .sub{font-size:10px; color:var(--text-dim); letter-spacing:2px; text-transform:uppercase;}
+.theme-btn{background:var(--surface2); border:1px solid var(--border); color:var(--text);
+  border-radius:var(--radius); padding:8px 12px; font-size:13px; font-family:var(--font-body); font-weight:600;}
+
+/* ===== LAYOUT ===== */
+.wrap{max-width:520px; margin:0 auto; padding:10px;}
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:12px; margin-bottom:12px;}
+.card-title{display:flex; align-items:center; gap:8px; font-size:15px; font-weight:700;
+  text-transform:uppercase; letter-spacing:1px; color:var(--text); margin-bottom:10px;}
+.card-title .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);}
+.capture-btn{margin-left:auto; background:var(--surface2); border:1px solid var(--border); border-radius:8px;
+  width:28px; height:28px; font-size:14px; padding:0; flex-shrink:0; line-height:1;}
+.hint{font-size:11.5px; color:var(--text-dim); margin-top:4px; line-height:1.4;}
+
+/* ===== GAME SELECT ===== */
+.seg{display:flex; gap:6px; background:var(--surface2); padding:4px; border-radius:var(--radius); border:1px solid var(--border);}
+.seg button{flex:1; padding:9px 4px; font-size:12px; font-weight:700; border:none; border-radius:9px;
+  background:transparent; color:var(--text-dim); font-family:var(--font-body);}
+.seg button.active{background:var(--accent); color:#04121a;}
+
+/* ===== BANDS ===== */
+.band{border:1px solid var(--border); border-radius:var(--radius); padding:8px; margin-bottom:8px; background:var(--surface2);}
+.band-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+.band-head span{font-weight:700; font-size:12px; color:var(--accent);}
+.band-head .toggle{font-size:10px; color:var(--text-dim); background:none; border:1px solid var(--border);
+  border-radius:7px; padding:3px 6px;}
+input, select{background:var(--bg); border:1px solid var(--border); color:var(--text);
+  border-radius:8px; padding:6px 2px; font-size:12px; font-family:var(--font-body); text-align:center; min-width:0;}
+.legend-row{display:grid; grid-template-columns:1fr 1fr .8fr .8fr .8fr .8fr .8fr .8fr; gap:3px;
+  padding:0 4px; margin-bottom:4px;}
+.legend-row span{font-size:8.5px; color:var(--text-dim); text-align:center; text-transform:uppercase; letter-spacing:.3px;}
+.legend-row span.lbl-from{grid-column:1/3; text-align:left; padding-left:2px;}
+.band-row{display:grid; grid-template-columns:1fr 1fr .8fr .8fr .8fr .8fr .8fr .8fr; gap:3px; align-items:center;}
+.band-row input{padding:7px 1px; font-size:12px;}
+.row-inline{display:flex; gap:6px; margin-bottom:6px;}
+.row-inline input{width:100%;}
+.blocks-panel{display:none; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border);}
+.blocks-panel.open{display:block;}
+.block-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:5px; margin-bottom:6px;}
+.block-grid input{padding:6px 2px; font-size:12px;}
+.weight-row{display:flex; align-items:center; gap:8px;}
+.weight-row input[type=range]{flex:1; accent-color:var(--accent);}
+.weight-val{font-size:12px; color:var(--accent); font-weight:700; min-width:34px; text-align:right;}
+
+.add-band-btn{width:100%; padding:10px; background:transparent; border:1px dashed var(--border);
+  color:var(--accent); border-radius:var(--radius); font-weight:700; font-size:13px; font-family:var(--font-body); margin-bottom:8px;}
+
+.group-tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:10px; -webkit-overflow-scrolling:touch;}
+.group-tab{display:flex; align-items:center; gap:4px; background:var(--surface2); border:1px solid var(--border);
+  border-radius:9px; padding:4px 4px 4px 8px; flex-shrink:0;}
+.group-tab.active{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset;}
+.group-tab-name{background:transparent; border:none; color:var(--text); font-weight:700; font-size:12px;
+  font-family:var(--font-body); width:80px; padding:2px 0;}
+.group-tab.active .group-tab-name{color:var(--accent);}
+.group-tab-rm{width:18px; height:18px; border-radius:5px; border:none; background:var(--bg); color:var(--bad);
+  font-size:10px; font-weight:800; padding:0; flex-shrink:0;}
+.group-tab-add{flex-shrink:0; padding:6px 12px; border-radius:9px; border:1px dashed var(--border);
+  background:transparent; color:var(--accent); font-weight:700; font-size:12px; font-family:var(--font-body);}
+.set-index-group{font-size:8.5px; color:var(--text-dim); display:block; text-align:center;}
+
+/* ===== QUICK BIAS GENERATORS ===== */
+.bias-label{font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.5px; margin:8px 0 6px;}
+.bias-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:4px;}
+.bias-btn{padding:8px 3px; border-radius:9px; border:1px solid var(--border); background:var(--surface2);
+  color:var(--text); font-weight:800; font-size:12px; font-family:var(--font-body); display:flex; flex-direction:column; gap:2px;}
+.bias-btn .bb-formula{font-size:8px; color:var(--text-dim); font-weight:700;}
+.bias-btn:active{background:var(--accent); color:#04121a;}
+.bias-btn:active .bb-formula{color:#04121a;}
+.status-pill{font-size:11px; padding:5px 10px; border-radius:12px; background:var(--surface2);
+  border:1px solid var(--border); color:var(--text-dim); display:inline-block;}
+.status-pill.connected{background:rgba(51,209,122,.18); color:var(--good); border-color:var(--good);}
+
+/* ===== ACTIONS ===== */
+.actions{display:flex; gap:8px;}
+.btn{flex:1; padding:13px; border-radius:var(--radius); border:none; font-weight:800; font-size:14px;
+  font-family:var(--font-body); letter-spacing:.5px;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#04121a;
+  box-shadow:0 4px 18px -4px var(--accent);}
+.btn-secondary{background:var(--surface2); color:var(--text); border:1px solid var(--border);}
+.num-input{width:64px;}
+
+/* ===== SETS OUTPUT ===== */
+.set-row{display:flex; align-items:center; gap:4px; padding:6px 8px; border-radius:var(--radius);
+  background:var(--surface2); border:1px solid var(--border); margin-bottom:6px; flex-wrap:nowrap; overflow-x:auto;}
+.set-index{font-size:9.5px; color:var(--text-dim); width:14px; font-weight:700; flex-shrink:0;}
+.ball{width:28px; height:28px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:11px; background:var(--bg); border:1px solid var(--border); color:var(--text); flex-shrink:0;}
+.ball.bonus{border-color:var(--accent2); color:var(--accent2);}
+.ball.match{background:var(--good); color:#04120a; border-color:var(--good); box-shadow:0 0 8px var(--good);}
+.ball.match.bonus{background:var(--accent2); color:#1a0410; border-color:var(--accent2); box-shadow:0 0 8px var(--accent2);}
+.ball-edit{width:28px; height:28px; border-radius:9px; font-size:10px; padding:0; flex-shrink:0;}
+.set-tools{display:flex; gap:3px; margin-left:auto; flex-shrink:0;}
+.set-tools button{width:26px; height:26px; border-radius:8px; border:1px solid var(--border); background:var(--bg);
+  color:var(--text-dim); font-size:12px; padding:0; flex-shrink:0;}
+.set-tools button.on{background:var(--accent); border-color:var(--accent); color:#04121a;}
+.set-row.locked{border-color:var(--warn);}
+
+/* view-toggle highlight states (mutually applied by priority) */
+.ball.vt-lower{background:#2d6cdf; color:#eaf1ff; border-color:#2d6cdf;}
+.ball.vt-upper{background:#dfa22d; color:#1a1204; border-color:#dfa22d;}
+.ball.vt-odd{background:#8a5bff; color:#f2eeff; border-color:#8a5bff;}
+.ball.vt-even{background:#2db88f; color:#eafff8; border-color:#2db88f;}
+.ball.vt-c2{background:#ffcc33; color:#1a1204; border-color:#ffcc33;}
+.ball.vt-c3{background:#ff7a00; color:#1a0f04; border-color:#ff7a00;}
+.ball.vt-c4{background:#ff2ec4; color:#1a0412; border-color:#ff2ec4;}
+.sheet-cell.vt-lower{background:#2d6cdf; color:#eaf1ff;}
+.sheet-cell.vt-upper{background:#dfa22d; color:#1a1204;}
+.sheet-cell.vt-odd{background:#8a5bff; color:#f2eeff;}
+.sheet-cell.vt-even{background:#2db88f; color:#eafff8;}
+.sheet-cell.vt-c2{background:#ffcc33; color:#1a1204;}
+.sheet-cell.vt-c3{background:#ff7a00; color:#1a0f04;}
+.sheet-cell.vt-c4{background:#ff2ec4; color:#1a0412;}
+.sheet-cell.match{background:var(--good); color:#04120a;}
+.sheet-cell.bonus-col{color:var(--accent2); font-weight:800;}
+
+.toggle-row{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:12px;}
+.vt-btn{padding:8px 4px; border-radius:9px; border:1px solid var(--border);
+  background:var(--surface2); color:var(--text-dim); font-size:10.5px; font-weight:700; font-family:var(--font-body);}
+.vt-btn.active{color:#04121a;}
+.vt-btn[data-vt="lower"].active{background:#2d6cdf; border-color:#2d6cdf; color:#eaf1ff;}
+.vt-btn[data-vt="upper"].active{background:#dfa22d; border-color:#dfa22d;}
+.vt-btn[data-vt="odd"].active{background:#8a5bff; border-color:#8a5bff; color:#f2eeff;}
+.vt-btn[data-vt="even"].active{background:#2db88f; border-color:#2db88f;}
+.vt-btn[data-vt="c2"].active{background:#ffcc33; border-color:#ffcc33;}
+.vt-btn[data-vt="c3"].active{background:#ff7a00; border-color:#ff7a00;}
+.vt-btn[data-vt="c4"].active{background:#ff2ec4; border-color:#ff2ec4;}
+
+/* ===== EXCEL / SHEETS VIEW ===== */
+.sheet-toolbar{display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;}
+.sheet-toolbar button{flex:1; min-width:100px;}
+.sheet-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); -webkit-overflow-scrolling:touch;}
+.sheet-table{border-collapse:collapse; width:100%; font-size:12px; font-family:var(--font-body);}
+.sheet-table th, .sheet-table td{border:1px solid var(--border); padding:6px 10px; text-align:center; white-space:nowrap;}
+.sheet-table th{background:var(--surface2); color:var(--accent); font-weight:800; font-size:11px;
+  position:sticky; top:0; z-index:2;}
+.sheet-table th.corner{background:var(--surface); color:var(--text-dim); position:sticky; left:0; z-index:3;}
+.sheet-table td.row-head{background:var(--surface2); color:var(--text-dim); font-weight:700; font-size:11px;
+  position:sticky; left:0; z-index:1;}
+.sheet-table tbody tr:nth-child(even) td:not(.row-head){background:rgba(255,255,255,.02);}
+.sheet-table td.locked-row{border-left:2px solid var(--warn);}
+
+/* ===== P&L DASHBOARD ===== */
+.pl-inputs{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:10px;}
+.pl-field{display:flex; flex-direction:column; gap:3px;}
+.pl-field label{font-size:9.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.3px;}
+.pl-summary{display:flex; gap:8px; margin:10px 0;}
+.pl-box{flex:1; border-radius:var(--radius); padding:10px; text-align:center; border:1px solid var(--border);}
+.pl-box.cost{background:rgba(255,84,112,.12);}
+.pl-box.win{background:rgba(51,209,122,.12);}
+.pl-box .val{font-size:18px; font-weight:800;}
+.pl-box.cost .val{color:var(--bad);}
+.pl-box.win .val{color:var(--good);}
+.pl-box .lbl{font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:2px;}
+.pl-chart{width:100%; height:140px;}
+.pl-divs{margin-top:10px; font-size:11.5px; color:var(--text-dim);}
+.pl-divs .div-row{display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px solid var(--border);}
+.pl-divs .div-row b{color:var(--text);}
+
+/* ===== HISTORICAL IMPORT ===== */
+.hist-tabs{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:10px;}
+.hist-tabs button{padding:9px 4px; border-radius:9px; border:1px solid var(--border);
+  background:var(--surface2); color:var(--text-dim); font-size:10.5px; font-weight:700; font-family:var(--font-body); line-height:1.25;}
+.hist-tabs button.active{background:var(--accent); color:#04121a; border-color:var(--accent);}
+.hist-subtabs{display:flex; gap:6px; margin-bottom:8px;}
+.hist-subtabs button{flex:1; padding:7px 4px; border-radius:8px; border:1px solid var(--border);
+  background:transparent; color:var(--text-dim); font-size:11px; font-weight:700; font-family:var(--font-body);}
+.hist-subtabs button.active{background:var(--surface2); color:var(--accent); border-color:var(--accent);}
+.hist-pane{display:none;}
+.hist-pane.open{display:block;}
+.paste-area{width:100%; min-height:80px; background:var(--bg); border:1px solid var(--border); color:var(--text);
+  border-radius:var(--radius); padding:10px; font-size:12px; font-family:var(--font-body); resize:vertical; margin-bottom:8px;}
+.paste-hint{font-size:10.5px; color:var(--text-dim); margin-bottom:8px; line-height:1.4;}
+.file-row{display:flex; gap:8px; margin-bottom:8px;}
+.file-btn{flex:1; text-align:center; padding:10px; border-radius:var(--radius); border:1px dashed var(--border);
+  background:transparent; color:var(--accent); font-size:12px; font-weight:700; font-family:var(--font-body); cursor:pointer;}
+.file-btn input{display:none;}
+
+.num-grid{display:grid; grid-template-columns:repeat(8,1fr); gap:5px; margin-bottom:10px;}
+.grid-cell{aspect-ratio:1; border-radius:10px; border:1px solid var(--border); background:var(--bg);
+  color:var(--text); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; font-family:var(--font-body);}
+.grid-cell.sel{background:var(--accent); color:#04121a; border-color:var(--accent); box-shadow:0 0 8px var(--accent);}
+.grid-status{font-size:11.5px; color:var(--text-dim); margin-bottom:8px;}
+.grid-status b{color:var(--accent);}
+.triple-grid-block{border:1px solid var(--border); border-radius:var(--radius); padding:10px; margin-bottom:12px; background:var(--surface2);}
+.triple-grid-block h4{font-size:12px; color:var(--accent); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px;}
+
+.hist-list .set-row{cursor:default;}
+.hist-empty{text-align:center; padding:20px 10px; color:var(--text-dim); font-size:12.5px;}
+.hist-list .set-row.selectable{cursor:pointer;}
+.hist-list .set-row.picked{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset;}
+.pick-box{width:20px; height:20px; border-radius:6px; border:1px solid var(--border); background:var(--bg);
+  flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:var(--accent);}
+.pick-box.on{background:var(--accent); color:#04121a;}
+.analysis-panel{margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);}
+.analysis-title{font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px;}
+.analysis-sep{display:flex; align-items:center; gap:8px; margin:14px 0 6px;}
+.analysis-sep .line{flex:1; height:1px; background:var(--border);}
+.analysis-sep span{font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; white-space:nowrap;}
+
+/* band-range highlight colors (1-9 / 10-19 / 20-29 / 30-39 / 40-52) */
+.ball.vt-b1{background:#00e5ff; color:#04121a; border-color:#00e5ff;}
+.ball.vt-b2{background:#7fff00; color:#0a1a00; border-color:#7fff00;}
+.ball.vt-b3{background:#ffd166; color:#1a1204; border-color:#ffd166;}
+.ball.vt-b4{background:#ff8fa3; color:#1a0410; border-color:#ff8fa3;}
+.ball.vt-b5{background:#b083ff; color:#12041a; border-color:#b083ff;}
+.vt-btn.band-btn-1.active{background:#00e5ff; border-color:#00e5ff; color:#04121a;}
+.vt-btn.band-btn-2.active{background:#7fff00; border-color:#7fff00; color:#0a1a00;}
+.vt-btn.band-btn-3.active{background:#ffd166; border-color:#ffd166; color:#1a1204;}
+.vt-btn.band-btn-4.active{background:#ff8fa3; border-color:#ff8fa3; color:#1a0410;}
+.vt-btn.band-btn-5.active{background:#b083ff; border-color:#b083ff; color:#12041a;}
+
+/* range selector dropdown */
+.hist-range-row{display:flex; align-items:center; gap:8px; margin-bottom:10px;}
+.hist-range-row select{flex:1; background:var(--bg); border:1px solid var(--border); color:var(--text);
+  border-radius:8px; padding:7px 8px; font-size:12px; font-family:var(--font-body);}
+
+/* draw ID / date fields on the right of each historical row */
+.hist-meta{display:flex; flex-direction:column; gap:2px; margin-left:auto; flex-shrink:0;}
+.hist-meta input{width:76px; background:var(--bg); border:1px solid var(--border); color:var(--text-dim);
+  border-radius:6px; padding:3px 5px; font-size:9.5px; font-family:var(--font-body); text-align:center;}
+.hist-meta input:focus{color:var(--accent);}
+
+/* ===== COMMON COMBINATIONS ===== */
+.combo-toolbar{display:flex; gap:6px; margin-bottom:10px;}
+.combo-toolbar button{flex:1;}
+.combo-row{display:flex; align-items:center; gap:6px; padding:8px 10px; border-radius:9px;
+  background:var(--surface2); border:1px solid var(--border); margin-bottom:6px; flex-wrap:wrap;}
+.combo-rank{font-size:11px; color:var(--text-dim); font-weight:800; width:22px; flex-shrink:0;}
+.combo-count{margin-left:auto; font-size:11px; color:#04121a; font-weight:800; background:var(--accent);
+  padding:3px 9px; border-radius:8px; flex-shrink:0;}
+.band-out-row{display:flex; gap:4px; margin-bottom:5px; flex-wrap:wrap;}
+.combo-meta{width:100%; font-size:9.5px; color:var(--text-dim); margin-top:2px;}
+
+/* ===== NUMBER FREQUENCY & RANGE STATS ===== */
+.freq-grid{display:grid; grid-template-columns:repeat(8,1fr); gap:5px; margin-bottom:8px;}
+.freq-cell{aspect-ratio:1; border-radius:10px; border:1px solid var(--border); background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2px;}
+.freq-cell .fn{font-size:11px; font-weight:800; color:var(--text); line-height:1.1;}
+.freq-cell .fp{font-size:8px; font-weight:700; color:var(--accent); line-height:1.1;}
+.freq-cell.freq-hot{background:rgba(51,209,122,.18); border-color:var(--good);}
+.freq-cell.freq-cold{background:rgba(255,84,112,.14); border-color:var(--bad); opacity:.75;}
+.freq-cell.freq-none{opacity:.35;}
+
+/* ===== CONFIRMED PLAYS & SPEND ===== */
+.spend-row{display:flex; align-items:center; gap:6px; padding:8px 10px; border-radius:9px;
+  background:var(--surface2); border:1px solid var(--good); margin-bottom:6px; flex-wrap:wrap;}
+.spend-cost{margin-left:auto; font-size:11px; color:#04120a; font-weight:800; background:var(--good);
+  padding:3px 9px; border-radius:8px; flex-shrink:0;}
+.spend-date{font-size:9.5px; color:var(--text-dim); flex-shrink:0;}
+.spend-rm{width:22px; height:22px; border-radius:6px; border:1px solid var(--border); background:var(--bg);
+  color:var(--bad); font-size:11px; font-weight:800; padding:0; flex-shrink:0;}
+.confirm-btn{width:26px; height:26px; border-radius:8px; border:1px solid var(--border); background:var(--bg);
+  color:var(--text-dim); font-size:12px; padding:0; flex-shrink:0;}
+.confirm-btn.on{background:var(--good); border-color:var(--good); color:#04120a;}
+
+/* ===== DRAWING TOOL ===== */
+.draw-toolbar{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:8px;}
+.draw-toolbar button{padding:9px 4px; border-radius:9px; border:1px solid var(--border);
+  background:var(--surface2); color:var(--text-dim); font-size:11px; font-weight:700; font-family:var(--font-body);}
+.draw-toolbar button.active{background:var(--accent); color:#04121a; border-color:var(--accent);}
+.color-row{display:flex; gap:6px; align-items:center; margin-bottom:8px; flex-wrap:wrap;}
+.color-swatch{width:26px; height:26px; border-radius:50%; border:2px solid var(--border); flex-shrink:0;}
+.color-swatch.active{border-color:var(--text);}
+.size-row{display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+.size-row input[type=range]{flex:1; accent-color:var(--accent);}
+#drawCanvasWrap{position:relative; width:100%; border-radius:var(--radius); overflow:hidden; border:1px solid var(--border); background:#0a0a0a; touch-action:none;}
+#drawCanvas{width:100%; display:block; touch-action:none;}
+.collapse-toggle{background:var(--surface2); border:1px solid var(--border); color:var(--text);
+  border-radius:9px; padding:6px 10px; font-size:11px; font-weight:700; font-family:var(--font-body); display:flex; align-items:center; gap:4px;}
+.collapsible-body{display:none; margin-top:10px;}
+.collapsible-body.open{display:block;}
+.grid-cell{position:relative;}
+.grid-cell .tally-badge{position:absolute; top:-5px; right:-4px; background:var(--accent2); color:#1a0410;
+  font-size:8px; font-weight:800; border-radius:6px; padding:1px 3px; line-height:1; min-width:11px; text-align:center;}
+.grid-cell.rep{background:var(--accent2); border-color:var(--accent2); color:#1a0410;}
+.live-status{display:flex; gap:8px; margin:6px 0;}
+.live-box{flex:1; text-align:center; padding:6px; border-radius:9px; border:1px solid var(--border); font-size:10.5px; color:var(--text-dim);}
+.live-box b{display:block; font-size:15px; color:var(--text); margin-top:2px;}
+
+/* ===== 7-COLUMN DYNAMIC GRIDS ===== */
+.grid7-row{display:grid; grid-template-columns:20px repeat(7,1fr) 20px; gap:4px; margin-bottom:5px; align-items:center;}
+.grid7-row .row-tag{font-size:9px; color:var(--text-dim); font-weight:700;}
+.grid7-row input{padding:6px 1px; font-size:11px; text-align:center;}
+.grid7-row .ball{width:100%; height:26px; border-radius:8px; font-size:11px;}
+.row-rm{width:20px; height:20px; border-radius:6px; border:1px solid var(--border); background:var(--bg);
+  color:var(--bad); font-size:11px; font-weight:800; padding:0; line-height:1; flex-shrink:0;}
+.add-row-btn{width:100%; padding:9px; background:transparent; border:1px dashed var(--border);
+  color:var(--accent); border-radius:var(--radius); font-weight:700; font-size:12px; font-family:var(--font-body); margin-bottom:8px;}
+.row-label-input{width:100%; background:var(--bg); border:1px solid var(--border); color:var(--accent);
+  border-radius:7px; padding:4px 6px; font-size:10.5px; font-weight:700; margin-bottom:3px; font-family:var(--font-body);}
+.stats-row{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;}
+.stats-box{flex:1 1 45%; text-align:center; padding:8px 4px; border-radius:9px; border:1px solid var(--border); background:var(--surface2);}
+.stats-box .sv{font-size:16px; font-weight:800; color:var(--accent);}
+.stats-box .sl{font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.3px; margin-top:2px;}
+.io-row{display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;}
+.io-row button{flex:1; min-width:90px;}
+.latest-refresh{font-size:10.5px; color:var(--text-dim); margin-bottom:6px;}
+
+/* ===== ZOOM CONTROL ===== */
+#zoomControl{position:fixed; right:12px; bottom:16px; z-index:60; display:flex; flex-direction:column;
+  gap:6px; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:6px;
+  box-shadow:0 4px 16px rgba(0,0,0,.4);}
+#zoomControl button{width:38px; height:38px; border-radius:11px; border:1px solid var(--border);
+  background:var(--surface2); color:var(--text); font-size:16px; font-weight:800; font-family:var(--font-body);}
+#zoomControl button:active{background:var(--accent); color:#04121a;}
+#zoomLevel{text-align:center; font-size:9.5px; color:var(--text-dim); font-weight:700;}
+
+/* ===== MATCH CHECKER ===== */
+.draw-input-row{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;}
+.draw-input-row input{width:44px; padding:8px 0;}
+.result-summary{font-size:12px; color:var(--text-dim); margin-top:6px;}
+.result-summary b{color:var(--good);}
+
+/* ===== EMPTY STATE ===== */
+.empty{text-align:center; padding:30px 10px; color:var(--text-dim); font-size:13px;}
+
+/* ===== THEME SHEET ===== */
+.sheet-overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:100; display:none;}
+.sheet-overlay.open{display:block;}
+.sheet{position:fixed; left:0; right:0; bottom:0; z-index:101; background:var(--surface);
+  border-top:1px solid var(--border); border-radius:18px 18px 0 0; max-height:75vh; overflow-y:auto;
+  transform:translateY(100%); transition:transform .25s ease; padding:16px;}
+.sheet.open{transform:translateY(0);}
+.sheet-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+.sheet-close{background:var(--surface2); border:1px solid var(--border); color:var(--text);
+  border-radius:8px; padding:6px 10px; font-size:12px;}
+.theme-tabs{display:flex; gap:6px; margin-bottom:10px;}
+.theme-tabs button{flex:1; padding:8px; border-radius:8px; border:1px solid var(--border);
+  background:var(--surface2); color:var(--text-dim); font-weight:700; font-size:12px;}
+.theme-tabs button.active{background:var(--accent); color:#04121a;}
+.theme-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+.theme-swatch{border-radius:var(--radius); padding:10px 6px; border:2px solid var(--border);
+  display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;}
+.theme-swatch.active{border-color:var(--accent);}
+.swatch-dots{display:flex; gap:3px;}
+.swatch-dots span{width:12px; height:12px; border-radius:4px; display:block;}
+.theme-swatch small{font-size:9.5px; color:var(--text-dim); text-align:center; line-height:1.2;}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="logo">DevSoft <span style="color:var(--accent2)">Pulse</span></div>
+    <div class="sub">Band Generator</div>
+  </div>
+  <button class="theme-btn" onclick="openThemeSheet()">🎨 Theme</button>
+</div>
+
+<div class="wrap">
+
+  <!-- SAVE / LOAD -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Save &amp; Load</div>
+    <div class="hint" style="margin-bottom:8px;">Save your progress so it's still here next time you open this file — bands, generated sets, historical draws, grids, theme, all of it.</div>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:8px;" onclick="saveProgress()">💾 Save Progress</button>
+    <div class="hint" style="margin-bottom:6px;">Backup or transfer your work as a downloadable file:</div>
+    <div class="io-row">
+      <button class="btn btn-secondary" onclick="saveWork()">⬇️ Download Backup (.json)</button>
+      <label class="file-btn" style="flex:1;">📂 Load Backup File
+        <input type="file" accept=".json" onchange="loadWork(event)" style="display:none;">
+      </label>
+    </div>
+    <div class="hint" id="saveStatus" style="margin-top:6px;"></div>
+  </div>
+
+  <!-- GAME SELECT -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Game</div>
+    <div class="seg" id="gameSeg">
+      <button class="active" data-game="salotto" onclick="switchGame('salotto')">SA Lotto</button>
+      <button data-game="plus1" onclick="switchGame('plus1')">Lotto Plus 1</button>
+      <button data-game="max" onclick="switchGame('max')">Lotto Max</button>
+    </div>
+    <div class="hint">Pool 1–52 · 6 main numbers + 1 bonus · 7 numbers per set</div>
+  </div>
+
+  <!-- BANDS -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>My Method — Band Groups</div>
+    <div class="hint" style="margin-bottom:8px;">Every 5 generated sets switches to the next band group below — so a big batch cycles through all your defined biases (e.g. 5 Lower, 5 Upper, 5 Lower...). Add up to 20 groups for any custom range bias.</div>
+    <div class="group-tabs" id="groupTabsHolder"></div>
+    <div class="legend-row">
+      <span class="lbl-from">Range (From–To)</span>
+      <span>O</span><span>E</span><span>A</span><span>oA</span><span>eA</span><span>S</span>
+    </div>
+    <div id="bandsHolder"></div>
+    <button class="add-band-btn" id="addBandBtn" onclick="addBand()">+ Add Band to this Group</button>
+    <div class="hint">Each band: range + odd/even/any/all-odd/all-even/seed picks ("insurance"), plus 5 block numbers with a weighted chance of use.</div>
+  </div>
+
+  <!-- QUICK BIAS GENERATORS -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Quick Bias Generators</div>
+    <div class="hint" style="margin-bottom:8px;">One tap creates a new band group using a 7-number formula across the 5 ranges (1–9 / 10–19 / 20–29 / 30–39 / 40–52), odd/even mixed within each range. Feeds both your 6 main numbers and the bonus.</div>
+    <div class="bias-label">Lower Bias — weighted toward smaller numbers</div>
+    <div class="bias-grid" id="lowerBiasGrid"></div>
+    <div class="bias-label">Upper Bias — weighted toward bigger numbers</div>
+    <div class="bias-grid" id="upperBiasGrid"></div>
+  </div>
+
+  <!-- GENERATE -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Generate</div>
+    <div class="row-inline" style="align-items:center;">
+      <span style="font-size:12px;color:var(--text-dim);white-space:nowrap;">Sets:</span>
+      <input type="number" id="numSets" class="num-input" value="5" min="1" max="3000">
+      <span style="font-size:12px;color:var(--text-dim);white-space:nowrap;">Cooldown:</span>
+      <input type="number" id="cooldown" class="num-input" value="1" min="0" max="5">
+    </div>
+    <div class="row-inline" style="align-items:center; margin-top:8px;">
+      <span style="font-size:12px;color:var(--text-dim);white-space:nowrap;">Exclude:</span>
+      <input type="text" id="excludeNums" placeholder="e.g. 5, 12, 23" style="flex:1;">
+    </div>
+    <div class="actions" style="margin-top:8px;">
+      <button class="btn btn-primary" onclick="generateSets()">⚡ Generate</button>
+      <button class="btn btn-secondary" onclick="clearSets()">Clear</button>
+    </div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Generated Sets</div>
+    <div class="toggle-row" id="toggleRow">
+      <button class="vt-btn" data-vt="lower" onclick="toggleVT('lower')">Lower Half</button>
+      <button class="vt-btn" data-vt="upper" onclick="toggleVT('upper')">Upper Half</button>
+      <button class="vt-btn" data-vt="odd" onclick="toggleVT('odd')">Odd</button>
+      <button class="vt-btn" data-vt="even" onclick="toggleVT('even')">Even</button>
+      <button class="vt-btn" data-vt="c2" onclick="toggleVT('c2')">Cluster×2</button>
+      <button class="vt-btn" data-vt="c3" onclick="toggleVT('c3')">Cluster×3</button>
+      <button class="vt-btn" data-vt="c4" onclick="toggleVT('c4')">Cluster×4</button>
+    </div>
+    <div id="setsOutput"><div class="empty">No sets yet — configure bands and tap Generate.</div></div>
+  </div>
+
+  <!-- EXCEL / SHEETS VIEW -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Excel / Sheets View</div>
+    <div class="hint" style="margin-bottom:8px;">A spreadsheet-style table of your generated sets — copy it straight into Excel or Google Sheets, or paste a table in from one. Highlight toggles above (Lower Half, Odd, Cluster, etc.) apply here too.</div>
+    <div class="sheet-toolbar">
+      <button class="btn btn-primary" onclick="copySheetToClipboard()">📋 Copy Table</button>
+      <button class="btn btn-secondary" onclick="pasteSheetFromClipboard()">📥 Paste Table</button>
+      <button class="btn btn-secondary" onclick="clearSets()">🗑 Clear</button>
+    </div>
+    <div class="sheet-wrap"><div id="sheetView"></div></div>
+  </div>
+
+  <!-- CONFIRMED PLAYS & SPEND -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Confirmed Plays &amp; Spend</div>
+    <div class="hint" style="margin-bottom:8px;">Tap ✓ Confirm on any set below once you've actually bought that ticket. This tally is separate from Generated Sets — it only grows when you confirm, and survives Clear/regenerate.</div>
+    <div class="row-inline" style="align-items:center; margin-bottom:10px;">
+      <span style="font-size:12px;color:var(--text-dim);white-space:nowrap;">Cost / ticket (R):</span>
+      <input type="number" id="costPerTicket" class="num-input" value="5" min="0" onchange="costPerTicket=+this.value">
+    </div>
+    <div class="pl-summary" style="display:flex;">
+      <div class="pl-box cost"><div class="val" id="tallyCount">0</div><div class="lbl">Confirmed Tickets</div></div>
+      <div class="pl-box win"><div class="val" id="tallySpend">R0</div><div class="lbl">Total Spent</div></div>
+    </div>
+    <div id="spendLog"></div>
+    <div class="actions" style="margin-top:8px;">
+      <button class="btn btn-secondary" onclick="resetSpendLedger()">Reset Tally</button>
+    </div>
+  </div>
+
+  <!-- MATCH CHECKER -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Match Checker</div>
+    <div class="hint" style="margin-bottom:8px;">Enter the official draw (7 numbers: 6 main + bonus) to highlight matches across all generated sets above.</div>
+    <div class="draw-input-row" id="drawInputs"></div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="checkMatches()">Check Matches</button>
+      <button class="btn btn-secondary" onclick="clearDraw()">Reset</button>
+    </div>
+    <div class="result-summary" id="matchSummary"></div>
+  </div>
+
+  <!-- P&L DASHBOARD -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Profit &amp; Loss</div>
+    <div class="hint" style="margin-bottom:8px;">Uses the draw numbers entered above in Match Checker. Edit division prize values to match the actual published payout.</div>
+    <div class="pl-inputs">
+      <div class="pl-field"><label>Cost / line (R)</label><input type="number" id="plCost" value="5" min="0"></div>
+      <div class="pl-field"><label>Div 1 (6 main)</label><input type="number" id="plDiv1" value="2000000" min="0"></div>
+      <div class="pl-field"><label>Div 2 (5+bonus)</label><input type="number" id="plDiv2" value="100000" min="0"></div>
+      <div class="pl-field"><label>Div 3 (5 main)</label><input type="number" id="plDiv3" value="3000" min="0"></div>
+      <div class="pl-field"><label>Div 4 (4+bonus)</label><input type="number" id="plDiv4" value="2000" min="0"></div>
+      <div class="pl-field"><label>Div 5 (4 main)</label><input type="number" id="plDiv5" value="200" min="0"></div>
+      <div class="pl-field"><label>Div 6 (3+bonus)</label><input type="number" id="plDiv6" value="100" min="0"></div>
+      <div class="pl-field"><label>Div 7 (3 main)</label><input type="number" id="plDiv7" value="50" min="0"></div>
+      <div class="pl-field"><label>Div 8 (2+bonus)</label><input type="number" id="plDiv8" value="20" min="0"></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;" onclick="calcPL()">Calculate P&amp;L</button>
+    <div class="pl-summary" id="plSummary" style="display:none;">
+      <div class="pl-box cost"><div class="val" id="plCostVal">R0</div><div class="lbl">Total Cost</div></div>
+      <div class="pl-box win"><div class="val" id="plWinVal">R0</div><div class="lbl">Total Winnings</div></div>
+    </div>
+    <svg class="pl-chart" id="plChart" viewBox="0 0 300 140" style="display:none;"></svg>
+    <div class="pl-divs" id="plDivs"></div>
+  </div>
+
+  <!-- DIRECTORY AUTO-SYNC -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Directory &amp; Auto-Sync</div>
+    <div class="hint" style="margin-bottom:8px;">Link a local folder once, then sync a CSV file straight into whichever game's Historical Draws tab is active — no copy/paste needed for large datasets. Requires Chrome or Samsung Internet.</div>
+    <div class="actions" style="margin-bottom:8px;">
+      <button class="btn btn-primary" onclick="linkLocalDirectory()">📁 Link Local Directory</button>
+      <span class="status-pill" id="dirStatus">Not linked</span>
+    </div>
+    <div class="hint" style="margin-bottom:6px;">Sync the active game's file (expects <code>salotto.csv</code>, <code>plus1.csv</code>, or <code>max.csv</code> in the linked folder — one draw per line, numbers comma/space separated, optional Draw ID and date):</div>
+    <button class="btn btn-secondary" style="width:100%;" onclick="syncActiveGameFile()">🔄 Sync <span id="syncFileLabel">salotto.csv</span></button>
+  </div>
+
+  <!-- HISTORICAL IMPORT -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Historical Draws</div>
+    <div class="hint" style="margin-bottom:8px;">SA Lotto: 50 draws from a consistently verified archive, dates included. Lotto Plus 1: 27 deduplicated draws with dates — the source's pagination was unreliable beyond this, so treat as partial. Lotto Max: no trustworthy bulk source found — paste or grid-enter it yourself. Official Draw ID numbers weren't available from the source, so that field is left blank — fill it in if you have it. Always cross-check important numbers against the official National Lottery site.</div>
+    <div class="hist-tabs" id="histTabs">
+      <button class="active" data-h="salotto" onclick="switchHistTab('salotto')">SA Lotto<br>Historical</button>
+      <button data-h="plus1" onclick="switchHistTab('plus1')">Lotto Plus 1<br>Historical</button>
+      <button data-h="max" onclick="switchHistTab('max')">Lotto Max<br>Historical</button>
+    </div>
+
+    <div class="hist-subtabs">
+      <button class="active" data-sub="paste" onclick="switchHistSub('paste')">Paste / Upload</button>
+      <button data-sub="grid" onclick="switchHistSub('grid')">1–52 Grid</button>
+      <button data-sub="list" onclick="switchHistSub('list')">View List</button>
+    </div>
+
+    <!-- PASTE / UPLOAD PANE -->
+    <div class="hist-pane open" id="pane-paste">
+      <div class="paste-hint">Paste draw rows — one draw per line, 7 numbers each (6 main + bonus), separated by commas or spaces. Or upload a .csv/.txt file.</div>
+      <textarea class="paste-area" id="pasteArea" placeholder="e.g.&#10;3,14,22,31,40,49,7&#10;1,9,18,27,36,45,12"></textarea>
+      <div class="file-row">
+        <button class="file-btn" type="button" onclick="pasteFromClipboard()">📋 Paste from Clipboard</button>
+        <label class="file-btn">📁 Upload File
+          <input type="file" accept=".csv,.txt" onchange="handleFileUpload(event)">
+        </label>
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="parsePasteArea()">Add to Historical</button>
+    </div>
+
+    <!-- GRID PANE -->
+    <div class="hist-pane" id="pane-grid">
+      <div id="tripleGridHolder"></div>
+    </div>
+
+    <!-- LIST PANE -->
+    <div class="hist-pane" id="pane-list">
+      <div class="hist-range-row">
+        <span style="font-size:11px;color:var(--text-dim);white-space:nowrap;">Show last:</span>
+        <select id="histRangeSelect" onchange="renderHistList()"></select>
+      </div>
+      <div class="toggle-row" id="histToggleRow">
+        <button class="vt-btn" data-vt="lower" onclick="toggleHistVT('lower')">Lower Half</button>
+        <button class="vt-btn" data-vt="upper" onclick="toggleHistVT('upper')">Upper Half</button>
+        <button class="vt-btn" data-vt="odd" onclick="toggleHistVT('odd')">Odd</button>
+        <button class="vt-btn" data-vt="even" onclick="toggleHistVT('even')">Even</button>
+        <button class="vt-btn" data-vt="c2" onclick="toggleHistVT('c2')">Cluster×2</button>
+        <button class="vt-btn" data-vt="c3" onclick="toggleHistVT('c3')">Cluster×3</button>
+        <button class="vt-btn" data-vt="c4" onclick="toggleHistVT('c4')">Cluster×4</button>
+      </div>
+      <div class="toggle-row" id="histBandRow">
+        <button class="vt-btn band-btn-1" data-vt="b1" onclick="toggleHistVT('b1')">1–9</button>
+        <button class="vt-btn band-btn-2" data-vt="b2" onclick="toggleHistVT('b2')">10–19</button>
+        <button class="vt-btn band-btn-3" data-vt="b3" onclick="toggleHistVT('b3')">20–29</button>
+        <button class="vt-btn band-btn-4" data-vt="b4" onclick="toggleHistVT('b4')">30–39</button>
+        <button class="vt-btn band-btn-5" data-vt="b5" onclick="toggleHistVT('b5')">40–52</button>
+      </div>
+      <div class="hist-list" id="histList"></div>
+      <div class="analysis-panel" id="histAnalysis" style="display:none;">
+        <div class="hint" id="analysisStatus" style="margin-bottom:8px;"></div>
+        <div class="analysis-title">Numbers Left (never drawn in selection)</div>
+        <div id="analysisLeft"></div>
+        <div class="analysis-sep"><div class="line"></div><span>Repeated Numbers</span><div class="line"></div></div>
+        <div id="analysisRepeated"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMON COMBINATIONS -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Common Combinations</div>
+    <div class="hint" style="margin-bottom:8px;">Scans this game's Historical Draws for the most frequent pairs, triplets, and 4-number combos that showed up together.</div>
+    <div class="combo-toolbar">
+      <button class="btn btn-primary" onclick="computeCombos(2)">Pairs</button>
+      <button class="btn btn-primary" onclick="computeCombos(3)">Triplets</button>
+      <button class="btn btn-primary" onclick="computeCombos(4)">4-Numbers</button>
+    </div>
+    <div id="comboResults"></div>
+  </div>
+
+  <!-- NUMBER FREQUENCY & RANGE STATS -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Number Frequency &amp; Range Stats</div>
+    <div class="hint" style="margin-bottom:8px;">Each number's share of every slot drawn across this game's Historical Draws — all percentages together add up to 100%. Range boxes below show each decade's combined share.</div>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:10px;" onclick="renderFrequencyGrid()">↻ Refresh Stats</button>
+    <div id="freqRangeStats" class="stats-row"></div>
+    <div id="freqGrid" class="freq-grid"></div>
+    <div class="hint" id="freqEmptyNote"></div>
+  </div>
+
+  <!-- PATTERN GRID (dynamic, up to 10x7) -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Pattern Grid <span id="patternGridTitleCount">(5×7)</span></div>
+    <div class="hint" style="margin-bottom:8px;">Store patterns or number sequences you want to replicate or follow. Stats update live as you fill it in. Add rows up to 10.</div>
+    <div id="patternGridHolder"></div>
+    <button class="add-row-btn" onclick="addPatternRow()">+ Add Row</button>
+    <div class="stats-row" id="patternStats"></div>
+    <textarea class="paste-area" id="patternPaste" placeholder="Paste up to 10 lines of 7 numbers each, comma or space separated..."></textarea>
+    <div class="file-row">
+      <button class="file-btn" type="button" onclick="pasteToGrid('patternPaste')">📋 Paste from Clipboard</button>
+      <label class="file-btn">📁 Upload File
+        <input type="file" accept=".csv,.txt" onchange="handleGenericFileUpload(event,'patternPaste')">
+      </label>
+    </div>
+    <div class="io-row">
+      <button class="btn btn-primary" onclick="fillGridFromText('patternPaste', patternGrid, renderPatternGrid, true)">Fill Grid</button>
+      <button class="btn btn-secondary" onclick="copyGridToClipboard(patternGrid)">📋 Copy Grid</button>
+      <button class="btn btn-secondary" onclick="clearPatternGrid()">Clear</button>
+    </div>
+  </div>
+
+  <!-- LATEST DRAWS SNAPSHOT 3x7 -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Latest Draws (3×7)</div>
+    <div class="latest-refresh">Auto-pulled from Historical Draws — always shows the first entry stored per lottery. Tap Refresh after adding new draws.</div>
+    <div id="latestDrawsHolder"></div>
+    <div class="io-row">
+      <button class="btn btn-secondary" onclick="renderLatestDraws()">↻ Refresh</button>
+      <button class="btn btn-secondary" onclick="copyLatestDraws()">📋 Copy All</button>
+    </div>
+  </div>
+
+  <!-- HOT/COLD/PREDICTIONS (dynamic, up to 10x7) -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Hot / Cold / Predictions <span id="hotColdTitleCount">(4×7)</span></div>
+    <div class="hint" style="margin-bottom:8px;">Tag each row and store hot numbers, cold numbers, or any prediction sets you come across. Add rows up to 10 — new rows auto-label Prediction C, D, E...</div>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:8px;" onclick="loadHotColdSnapshot()">⬇️ Load Latest Hot/Cold Snapshot</button>
+    <div id="hotColdHolder"></div>
+    <button class="add-row-btn" onclick="addHotColdRow()">+ Add Row</button>
+    <textarea class="paste-area" id="hotColdPaste" placeholder="Paste up to 10 lines of 7 numbers each, comma or space separated..."></textarea>
+    <div class="file-row">
+      <button class="file-btn" type="button" onclick="pasteToGrid('hotColdPaste')">📋 Paste from Clipboard</button>
+      <label class="file-btn">📁 Upload File
+        <input type="file" accept=".csv,.txt" onchange="handleGenericFileUpload(event,'hotColdPaste')">
+      </label>
+    </div>
+    <div class="io-row">
+      <button class="btn btn-primary" onclick="fillGridFromText('hotColdPaste', hotColdGrid.rows, renderHotColdGrid)">Fill Grid</button>
+      <button class="btn btn-secondary" onclick="copyGridToClipboard(hotColdGrid.rows, hotColdGrid.labels)">📋 Copy Grid</button>
+      <button class="btn btn-secondary" onclick="clearHotColdGrid()">Clear</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between; cursor:pointer;" onclick="toggleDrawCollapse()">
+      <span style="display:flex;align-items:center;gap:8px;"><span class="dot"></span>Highlight &amp; Annotate</span>
+      <button class="collapse-toggle" id="drawCollapseBtn" onclick="event.stopPropagation();toggleDrawCollapse()">Show ▾</button>
+    </div>
+    <div class="collapsible-body" id="drawCollapseBody">
+    <div class="hint" style="margin-bottom:8px;">Upload a screenshot of any view above and mark it up, or draw freehand notes. Save the result as an image.</div>
+    <div class="draw-toolbar" id="drawToolbar">
+      <button class="active" data-tool="pen" onclick="setTool('pen')">✏️ Pen</button>
+      <button data-tool="highlighter" onclick="setTool('highlighter')">🖍️ Highlighter</button>
+      <button data-tool="circle" onclick="setTool('circle')">⭕ Circle</button>
+      <button data-tool="square" onclick="setTool('square')">⬜ Square</button>
+    </div>
+    <div class="color-row" id="colorRow"></div>
+    <div class="size-row">
+      <span style="font-size:11px;color:var(--text-dim);white-space:nowrap;">Size</span>
+      <input type="range" id="brushSize" min="2" max="30" value="6">
+    </div>
+    <div class="file-row">
+      <label class="file-btn">🖼️ Upload Screenshot
+        <input type="file" accept="image/*" onchange="loadImageToCanvas(event)">
+      </label>
+    </div>
+    <div id="drawCanvasWrap">
+      <canvas id="drawCanvas" width="500" height="360"></canvas>
+    </div>
+    <div class="actions" style="margin-top:8px;">
+      <button class="btn btn-secondary" onclick="clearCanvas()">Clear</button>
+      <button class="btn btn-primary" onclick="downloadCanvas()">💾 Save Image</button>
+    </div>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<!-- ZOOM CONTROL -->
+<div id="zoomControl">
+  <button onclick="adjustZoom(0.1)">+</button>
+  <div id="zoomLevel">100%</div>
+  <button onclick="adjustZoom(-0.1)">−</button>
+  <button onclick="resetZoom()" style="font-size:10px;">↺</button>
+</div>
+
+<!-- THEME SHEET -->
+<div class="sheet-overlay" id="sheetOverlay" onclick="closeThemeSheet()"></div>
+<div class="sheet" id="themeSheet">
+  <div class="sheet-head">
+    <h3>Themes</h3>
+    <button class="sheet-close" onclick="closeThemeSheet()">Close ✕</button>
+  </div>
+  <div class="theme-tabs">
+    <button class="active" data-tab="neon" onclick="switchThemeTab('neon')">⚡ Neon (25)</button>
+    <button data-tab="modern" onclick="switchThemeTab('modern')">♠ Casino/Modern (25)</button>
+  </div>
+  <div class="theme-grid" id="themeGrid"></div>
+</div>
+
+<script>
+/* =========================================================
+   THEME SYSTEM — 50 themes total (25 neon / 25 modern-casino)
+   Each theme = CSS variable set applied to :root
+   ========================================================= */
+const THEMES = {
+neon: [
+ {id:'neon-cyan',name:'Cyber Cyan',bg:'#080b12',surface:'#111826',surface2:'#182338',border:'#233252',text:'#eaf6ff',accent:'#00eaff',accent2:'#ff2ec4'},
+ {id:'neon-magenta',name:'Magenta Grid',bg:'#0a0510',surface:'#160a20',surface2:'#20102e',border:'#331a44',text:'#fbeaff',accent:'#ff2ec4',accent2:'#7c4dff'},
+ {id:'neon-lime',name:'Acid Lime',bg:'#070a06',surface:'#0f1710',surface2:'#162018',border:'#233828',text:'#eaffea',accent:'#c6ff00',accent2:'#00e5ff'},
+ {id:'neon-purple',name:'Ultraviolet',bg:'#0a0714',surface:'#150e24',surface2:'#1e1533',border:'#302150',text:'#f1eaff',accent:'#a259ff',accent2:'#00ffd5'},
+ {id:'neon-orange',name:'Solar Flare',bg:'#0e0704',surface:'#1a0f08',surface2:'#26160c',border:'#3d2412',text:'#fff2e6',accent:'#ff7a00',accent2:'#ff2ec4'},
+ {id:'neon-mint',name:'Mint Pulse',bg:'#050b0a',surface:'#0d1917',surface2:'#132420',border:'#1f3934',text:'#e7fff9',accent:'#00ffb3',accent2:'#00b3ff'},
+ {id:'neon-red',name:'Redline',bg:'#0c0505',surface:'#1a0a0a',surface2:'#260f0f',border:'#3d1818',text:'#ffeaea',accent:'#ff1744',accent2:'#ffb300'},
+ {id:'neon-blue',name:'Blue Voltage',bg:'#040810',surface:'#0a1220',surface2:'#101c34',border:'#1a2c50',text:'#eaf2ff',accent:'#2979ff',accent2:'#00e5ff'},
+ {id:'neon-pink-teal',name:'Vice City',bg:'#0a0714',surface:'#160e26',surface2:'#1f1436',border:'#33224f',text:'#ffeaf7',accent:'#ff4fd8',accent2:'#00fff0'},
+ {id:'neon-gold',name:'Neon Gold',bg:'#0b0904',surface:'#180f07',surface2:'#241a0c',border:'#3c2a14',text:'#fff6e0',accent:'#ffd700',accent2:'#ff2ec4'},
+ {id:'neon-emerald',name:'Emerald Circuit',bg:'#040b08',surface:'#0a1712',surface2:'#10221a',border:'#1c372a',text:'#e6fff5',accent:'#00ff85',accent2:'#7c4dff'},
+ {id:'neon-violet-orange',name:'Miami Nights',bg:'#0a0510',surface:'#160a1e',surface2:'#20112c',border:'#341f45',text:'#ffeef7',accent:'#ff5ec4',accent2:'#ff9d00'},
+ {id:'neon-ice',name:'Frostbyte',bg:'#040a0e',surface:'#0a161c',surface2:'#0f2029',border:'#1a3441',text:'#e6faff',accent:'#4de3ff',accent2:'#c6ff00'},
+ {id:'neon-crimson',name:'Crimson Wire',bg:'#0c0406',surface:'#190a0d',surface2:'#241014',border:'#3a1a20',text:'#ffe9ec',accent:'#ff2e63',accent2:'#00e5ff'},
+ {id:'neon-royal',name:'Royal Volt',bg:'#050612',surface:'#0c0e22',surface2:'#131632',border:'#212450',text:'#ececff',accent:'#5b6bff',accent2:'#ff2ec4'},
+ {id:'neon-tangerine',name:'Tangerine Static',bg:'#0e0803',surface:'#1c1006',surface2:'#28160a',border:'#402412',text:'#fff2e0',accent:'#ff8c00',accent2:'#00ffcc'},
+ {id:'neon-slime',name:'Slime Byte',bg:'#070a05',surface:'#10160a',surface2:'#182010',border:'#28351c',text:'#eeffe6',accent:'#7fff00',accent2:'#ff2ec4'},
+ {id:'neon-cherry',name:'Cherry Static',bg:'#0c0406',surface:'#1a0910',surface2:'#260e18',border:'#3d1826',text:'#ffe6ef',accent:'#ff1a75',accent2:'#ffd400'},
+ {id:'neon-arctic-purple',name:'Arctic Volt',bg:'#040814',surface:'#0a1226',surface2:'#101a38',border:'#1c2c55',text:'#e9f0ff',accent:'#6ee7ff',accent2:'#c084ff'},
+ {id:'neon-sunset',name:'Neon Sunset',bg:'#0e0509',surface:'#1c0a13',surface2:'#280f1c',border:'#42182e',text:'#ffeaf2',accent:'#ff3d81',accent2:'#ffbb00'},
+ {id:'neon-hacker',name:'Hacker Green',bg:'#020604',surface:'#06110a',surface2:'#0a1a10',border:'#122a1a',text:'#d9ffe6',accent:'#00ff41',accent2:'#00b3ff'},
+ {id:'neon-plasma',name:'Plasma Blue',bg:'#03060e',surface:'#080e1e',surface2:'#0d1630',border:'#17244f',text:'#e6ecff',accent:'#3d5bff',accent2:'#ff2ec4'},
+ {id:'neon-flamingo',name:'Flamingo Grid',bg:'#0c0509',surface:'#1a0a13',surface2:'#26101c',border:'#3d1a2e',text:'#ffeaf3',accent:'#ff4fa3',accent2:'#4dffea'},
+ {id:'neon-toxic',name:'Toxic Yellow',bg:'#0a0904',surface:'#161408',surface2:'#20200c',border:'#363214',text:'#fbffea',accent:'#eaff00',accent2:'#ff2ec4'},
+ {id:'neon-galaxy',name:'Galaxy Pulse',bg:'#050414',surface:'#0c0a26',surface2:'#131038',border:'#221c55',text:'#eeeaff',accent:'#8a5bff',accent2:'#00ffd5'}
+],
+modern: [
+ {id:'m-vegas-gold',name:'Vegas Gold',bg:'#0f0d0a',surface:'#1b1712',surface2:'#26201a',border:'#3a3125',text:'#f5efe4',accent:'#d4af37',accent2:'#8c1c2b'},
+ {id:'m-royal-emerald',name:'Royal Emerald',bg:'#08120e',surface:'#0f1e17',surface2:'#152a20',border:'#234636',text:'#eaf5ee',accent:'#1fa363',accent2:'#c9a227'},
+ {id:'m-monaco-blue',name:'Monaco Navy',bg:'#070c14',surface:'#0e1826',surface2:'#152436',border:'#243c58',text:'#eaf1fb',accent:'#3b7dd8',accent2:'#c9a227'},
+ {id:'m-burgundy',name:'Burgundy Velvet',bg:'#100608',surface:'#1e0d11',surface2:'#2a1319',border:'#432029',text:'#f7e9ec',accent:'#a3273f',accent2:'#d4af37'},
+ {id:'m-onyx-silver',name:'Onyx & Silver',bg:'#0a0a0c',surface:'#161618',surface2:'#212124',border:'#343438',text:'#f0f0f2',accent:'#c9ccd4',accent2:'#8c1c2b'},
+ {id:'m-espresso',name:'Espresso Casino',bg:'#0d0906',surface:'#1a130d',surface2:'#251b12',border:'#3c2c1c',text:'#f2e9dd',accent:'#b8712f',accent2:'#e0c56b'},
+ {id:'m-jade',name:'Jade Table',bg:'#060f0c',surface:'#0d1c17',surface2:'#132821',border:'#1f4237',text:'#e9f7f1',accent:'#2fbf8f',accent2:'#d4af37'},
+ {id:'m-sapphire',name:'Sapphire Suite',bg:'#050a16',surface:'#0b1428',surface2:'#11203c',border:'#1e355e',text:'#e8f0ff',accent:'#3a6df0',accent2:'#e7c14f'},
+ {id:'m-champagne',name:'Champagne Room',bg:'#0f0d09',surface:'#1c1810',surface2:'#282217',border:'#443a26',text:'#f7f0dd',accent:'#e3c76f',accent2:'#7a1f2b'},
+ {id:'m-graphite-red',name:'Graphite & Red',bg:'#0a0a0a',surface:'#171717',surface2:'#212121',border:'#343434',text:'#f0f0f0',accent:'#d92e3f',accent2:'#c9ccd4'},
+ {id:'m-teal-brass',name:'Teal & Brass',bg:'#060f10',surface:'#0d1c1e',surface2:'#13292b',border:'#1f4548',text:'#e8f7f8',accent:'#2fb8b0',accent2:'#c08a3e'},
+ {id:'m-plum',name:'Plum Reserve',bg:'#0c0710',surface:'#180e20',surface2:'#22162e',border:'#392149',text:'#f2e9fa',accent:'#8e4bb5',accent2:'#d4af37'},
+ {id:'m-forest-gold',name:'Forest & Gold',bg:'#070c07',surface:'#0f1a0f',surface2:'#162616',border:'#243c24',text:'#eaf5ea',accent:'#3f8f4f',accent2:'#d4af37'},
+ {id:'m-slate-crimson',name:'Slate & Crimson',bg:'#090a0d',surface:'#141821',surface2:'#1d222e',border:'#303747',text:'#eceef2',accent:'#c23b4a',accent2:'#8fa3c2'},
+ {id:'m-ivory-noir',name:'Ivory Noir',bg:'#0b0b0b',surface:'#181818',surface2:'#222222',border:'#383838',text:'#f5f2ea',accent:'#e8e0cc',accent2:'#a3273f'},
+ {id:'m-copper',name:'Copper Deck',bg:'#0d0805',surface:'#1c130b',surface2:'#291a10',border:'#452c19',text:'#f7ece0',accent:'#c2703e',accent2:'#2fb8b0'},
+ {id:'m-midnight-gold',name:'Midnight Gold',bg:'#060810',surface:'#0d1120',surface2:'#141b30',border:'#232e4d',text:'#eaeeff',accent:'#e3c76f',accent2:'#3a6df0'},
+ {id:'m-wine-silver',name:'Wine & Silver',bg:'#0d0709',surface:'#1a0e12',surface2:'#26141a',border:'#3f222a',text:'#f5e9ec',accent:'#9c2b47',accent2:'#c9ccd4'},
+ {id:'m-emerald-noir',name:'Emerald Noir',bg:'#060b09',surface:'#0d1613',surface2:'#131f1a',border:'#20342c',text:'#e6f5ef',accent:'#1fa363',accent2:'#e3c76f'},
+ {id:'m-classic-red',name:'Classic Casino Red',bg:'#0a0505',surface:'#170c0c',surface2:'#221111',border:'#3a1c1c',text:'#f7e9e9',accent:'#c8102e',accent2:'#e3c76f'},
+ {id:'m-steel-blue',name:'Steel Blue Lounge',bg:'#080a0e',surface:'#101620',surface2:'#182031',border:'#293650',text:'#eaeef5',accent:'#4a7fc9',accent2:'#c9ccd4'},
+ {id:'m-mocha-rose',name:'Mocha Rose',bg:'#0d0908',surface:'#1b1412',surface2:'#271b18',border:'#402d28',text:'#f6ece7',accent:'#c17b6b',accent2:'#e3c76f'},
+ {id:'m-obsidian-teal',name:'Obsidian Teal',bg:'#06090a',surface:'#0d1518',surface2:'#132022',border:'#20353a',text:'#e9f4f5',accent:'#2fb8b0',accent2:'#c9a227'},
+ {id:'m-imperial-purple',name:'Imperial Purple',bg:'#09060f',surface:'#130c1e',surface2:'#1c122c',border:'#301f47',text:'#f0eafa',accent:'#7a4fc9',accent2:'#e3c76f'},
+ {id:'m-pearl-navy',name:'Pearl & Navy',bg:'#070a10',surface:'#0e1420',surface2:'#151f31',border:'#25324f',text:'#eef1f7',accent:'#dfe4ee',accent2:'#3a6df0'}
+]
+};
+
+function applyTheme(t){
+  const r=document.documentElement.style;
+  r.setProperty('--bg',t.bg); r.setProperty('--surface',t.surface); r.setProperty('--surface2',t.surface2);
+  r.setProperty('--border',t.border); r.setProperty('--text',t.text);
+  r.setProperty('--accent',t.accent); r.setProperty('--accent2',t.accent2);
+  localStorage.setItem('devsoft-theme',t.id);
+  currentThemeId=t.id;
+  renderThemeGrid();
+}
+let currentThemeId='neon-cyan';
+let activeThemeTab='neon';
+
+function renderThemeGrid(){
+  const grid=document.getElementById('themeGrid');
+  grid.innerHTML='';
+  THEMES[activeThemeTab].forEach(t=>{
+    const el=document.createElement('div');
+    el.className='theme-swatch'+(t.id===currentThemeId?' active':'');
+    el.onclick=()=>applyTheme(t);
+    el.innerHTML=`<div class="swatch-dots">
+      <span style="background:${t.accent}"></span>
+      <span style="background:${t.accent2}"></span>
+      <span style="background:${t.surface2}"></span>
+    </div><small>${t.name}</small>`;
+    grid.appendChild(el);
+  });
+}
+function switchThemeTab(tab){
+  activeThemeTab=tab;
+  document.querySelectorAll('.theme-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  renderThemeGrid();
+}
+function openThemeSheet(){
+  document.getElementById('sheetOverlay').classList.add('open');
+  document.getElementById('themeSheet').classList.add('open');
+}
+function closeThemeSheet(){
+  document.getElementById('sheetOverlay').classList.remove('open');
+  document.getElementById('themeSheet').classList.remove('open');
+}
+
+/* =========================================================
+   BAND GROUPS — up to 20 groups, each with its own bands.
+   Generation alternates groups every 5 sets (e.g. 5 Lower, 5 Upper, 5 Lower...)
+   so a large batch produces sets biased across multiple ranges.
+   ========================================================= */
+let bandCount=0;
+let bandGroups=[]; // [{name, bands:[{id,from,to,odd,even,any,allOdd,allEven,seed,blocks:[5],weight}]}]
+let activeGroupIndex=0;
+const MAX_BAND_GROUPS = 20;
+
+function activeBands(){ return bandGroups[activeGroupIndex] ? bandGroups[activeGroupIndex].bands : []; }
+function findBand(id){
+  for(const g of bandGroups){ const b=g.bands.find(x=>x.id===id); if(b) return b; }
+  return null;
+}
+
+function addGroup(preBands, name){
+  if(bandGroups.length>=MAX_BAND_GROUPS){ alert('Maximum '+MAX_BAND_GROUPS+' band groups.'); return; }
+  bandGroups.push({ name: name || ('Group '+(bandGroups.length+1)), bands: preBands || [] });
+  activeGroupIndex = bandGroups.length-1;
+  renderGroupTabs();
+  renderBands();
+}
+function removeGroup(idx){
+  if(bandGroups.length<=1){ alert('At least one band group is required.'); return; }
+  bandGroups.splice(idx,1);
+  if(activeGroupIndex>=bandGroups.length) activeGroupIndex = bandGroups.length-1;
+  renderGroupTabs();
+  renderBands();
+}
+function switchGroup(idx){
+  activeGroupIndex = idx;
+  renderGroupTabs();
+  renderBands();
+}
+function renameGroup(idx, name){
+  bandGroups[idx].name = name || ('Group '+(idx+1));
+  renderGroupTabs();
+}
+function renderGroupTabs(){
+  const holder = document.getElementById('groupTabsHolder');
+  if(!holder) return;
+  holder.innerHTML = bandGroups.map((g,idx)=>`
+    <div class="group-tab${idx===activeGroupIndex?' active':''}">
+      <input class="group-tab-name" value="${g.name}" onclick="switchGroup(${idx});event.stopPropagation();" onchange="renameGroup(${idx},this.value)">
+      <button class="group-tab-rm" onclick="removeGroup(${idx})" title="Remove group">✕</button>
+    </div>
+  `).join('') + `<button class="group-tab-add" onclick="addGroup([], null)">+ Group</button>`;
+}
+
+function makeBand(from,to,odd,even,any,weight){
+  bandCount++;
+  return { id:'band'+bandCount, from, to, odd:odd||0, even:even||0, any:any||0, allOdd:0, allEven:0, seed:0,
+    blocks:['','','','',''], weight: weight!=null?weight:15 };
+}
+
+/* =========================================================
+   QUICK BIAS GENERATORS — 10 preset 7-number formulas across
+   the 5 ranges (1-9/10-19/20-29/30-39/40-52), odd/even mixed.
+   ========================================================= */
+const BIAS_RANGES = [[1,9],[10,19],[20,29],[30,39],[40,52]];
+const LOWER_BIAS_PRESETS = [
+  { name:'Lower Bias 1', formula:[3,2,1,0,1] },
+  { name:'Lower Bias 2', formula:[2,3,2,0,0] },
+  { name:'Lower Bias 3', formula:[3,1,2,1,0] },
+  { name:'Lower Bias 4', formula:[2,2,1,1,1] },
+  { name:'Lower Bias 5', formula:[4,1,1,1,0] }
+];
+const UPPER_BIAS_PRESETS = [
+  { name:'Upper Bias 1', formula:[1,0,0,3,3] },
+  { name:'Upper Bias 2', formula:[1,2,0,0,4] },
+  { name:'Upper Bias 3', formula:[0,1,1,2,3] },
+  { name:'Upper Bias 4', formula:[0,0,2,2,3] },
+  { name:'Upper Bias 5', formula:[0,1,0,3,3] }
+];
+function distributeOddEven(count, startWithOdd){
+  if(count<=0) return {odd:0, even:0};
+  const half = Math.floor(count/2);
+  if(count%2===0) return {odd:half, even:half};
+  return startWithOdd ? {odd:half+1, even:half} : {odd:half, even:half+1};
+}
+function buildBiasBands(formula, startWithOdd){
+  return BIAS_RANGES.map(([from,to],i)=>{
+    const { odd, even } = distributeOddEven(formula[i], startWithOdd);
+    return makeBand(from, to, odd, even, 0, 15);
+  });
+}
+function applyBiasPreset(preset, idx){
+  const bands = buildBiasBands(preset.formula, idx%2===0);
+  addGroup(bands, preset.name);
+}
+function renderBiasGrids(){
+  const lowerEl = document.getElementById('lowerBiasGrid');
+  const upperEl = document.getElementById('upperBiasGrid');
+  if(!lowerEl || !upperEl) return;
+  lowerEl.innerHTML = LOWER_BIAS_PRESETS.map((p,i)=>`
+    <button class="bias-btn" onclick='applyBiasPreset(${JSON.stringify(p)},${i})'>
+      <span>${p.name.replace('Lower Bias ','L')}</span>
+      <span class="bb-formula">${p.formula.join('-')}</span>
+    </button>`).join('');
+  upperEl.innerHTML = UPPER_BIAS_PRESETS.map((p,i)=>`
+    <button class="bias-btn" onclick='applyBiasPreset(${JSON.stringify(p)},${i})'>
+      <span>${p.name.replace('Upper Bias ','U')}</span>
+      <span class="bb-formula">${p.formula.join('-')}</span>
+    </button>`).join('');
+}
+
+function addBand(preset){
+  bandCount++;
+  const id='band'+bandCount;
+  const defaults = preset || {from:1, to:52, odd:0, even:0, any:1, allOdd:0, allEven:0, seed:0, blocks:['','','','',''], weight:20};
+  activeBands().push({id, ...defaults});
+  renderBands();
+}
+function removeBand(id){
+  const g = bandGroups[activeGroupIndex];
+  g.bands = g.bands.filter(b=>b.id!==id);
+  renderBands();
+}
+function toggleBlocks(id){
+  const el = document.getElementById('blocks-'+id);
+  el.classList.toggle('open');
+}
+function updateBand(id, field, value){
+  const b = findBand(id);
+  if(!b) return;
+  if(field==='blocks'){ /* handled separately */ }
+  else b[field] = value;
+}
+function updateBlock(id, idx, value){
+  const b = findBand(id);
+  if(!b) return;
+  b.blocks[idx] = value;
+}
+
+function renderBands(){
+  const holder = document.getElementById('bandsHolder');
+  holder.innerHTML='';
+  activeBands().forEach((b,i)=>{
+    const div = document.createElement('div');
+    div.className='band';
+    div.innerHTML = `
+      <div class="band-head">
+        <span>BAND ${i+1}</span>
+        <div style="display:flex;gap:6px;">
+          <button class="toggle" onclick="toggleBlocks('${b.id}')">Blocks %</button>
+          <button class="toggle" onclick="removeBand('${b.id}')">✕</button>
+        </div>
+      </div>
+      <div class="band-row">
+        <input type="number" title="From" placeholder="From" value="${b.from}" min="1" max="52" onchange="updateBand('${b.id}','from',+this.value)">
+        <input type="number" title="To" placeholder="To" value="${b.to}" min="1" max="52" onchange="updateBand('${b.id}','to',+this.value)">
+        <input type="number" title="Odd" min="0" value="${b.odd}" onchange="updateBand('${b.id}','odd',+this.value)">
+        <input type="number" title="Even" min="0" value="${b.even}" onchange="updateBand('${b.id}','even',+this.value)">
+        <input type="number" title="Any" min="0" value="${b.any}" onchange="updateBand('${b.id}','any',+this.value)">
+        <input type="number" title="All-Odd" min="0" value="${b.allOdd}" onchange="updateBand('${b.id}','allOdd',+this.value)">
+        <input type="number" title="All-Even" min="0" value="${b.allEven}" onchange="updateBand('${b.id}','allEven',+this.value)">
+        <input type="number" title="Seed" min="0" value="${b.seed}" onchange="updateBand('${b.id}','seed',+this.value)">
+      </div>
+      <div class="blocks-panel" id="blocks-${b.id}">
+        <div class="block-grid">
+          ${b.blocks.map((v,idx)=>`<input type="number" min="1" max="52" placeholder="B${idx+1}" value="${v}" onchange="updateBlock('${b.id}',${idx},this.value)">`).join('')}
+        </div>
+        <div class="weight-row">
+          <span style="font-size:11px;color:var(--text-dim);white-space:nowrap;">Use chance</span>
+          <input type="range" min="0" max="100" value="${b.weight}" oninput="updateBand('${b.id}','weight',+this.value); this.nextElementSibling.textContent=this.value+'%'">
+          <span class="weight-val">${b.weight}%</span>
+        </div>
+      </div>
+    `;
+    holder.appendChild(div);
+  });
+}
+
+/* =========================================================
+   GENERATION LOGIC
+   ========================================================= */
+let numberCooldownMap = {};
+
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+function pickFromBand(b, cooldownSet, excludedSet){
+  excludedSet = excludedSet || new Set();
+  const pool=[];
+  for(let n=b.from;n<=b.to;n++){
+    if(cooldownSet.has(n) || excludedSet.has(n)) continue;
+    pool.push(n);
+  }
+  const picks=new Set();
+  const useBlock = Math.random()*100 < (b.weight||0);
+  const blockNums = (b.blocks||[]).map(x=>+x).filter(x=>x>=1 && x<=52 && !cooldownSet.has(x) && !excludedSet.has(x));
+
+  function takeRandom(filterFn, count){
+    let tries=0;
+    while(picks.size < count && tries < 300){
+      tries++;
+      let n;
+      if(useBlock && blockNums.length){
+        n = blockNums[randInt(0,blockNums.length-1)];
+      } else {
+        n = pool[randInt(0,pool.length-1)];
+      }
+      if(n===undefined) break;
+      if(filterFn(n) && !picks.has(n)) picks.add(n);
+    }
+  }
+  takeRandom(n=>n%2!==0, b.odd||0);
+  takeRandom(n=>n%2===0, b.even||0);
+  takeRandom(()=>true, b.any||0);
+  // all-odd / all-even groups (treated as additional odd/even picks)
+  takeRandom(n=>n%2!==0, (b.allOdd||0));
+  takeRandom(n=>n%2===0, (b.allEven||0));
+  // seed = fixed/priority picks, just pull from pool
+  takeRandom(()=>true, b.seed||0);
+
+  return Array.from(picks);
+}
+
+function getExcludedSet(){
+  const raw = (document.getElementById('excludeNums')||{}).value || '';
+  return new Set(raw.split(',').map(s=>+s.trim()).filter(n=>n>=1 && n<=52));
+}
+
+function bandRangePool(bandsArr){
+  const s = new Set();
+  bandsArr.forEach(b=>{
+    const lo = Math.min(b.from,b.to), hi = Math.max(b.from,b.to);
+    for(let n=lo;n<=hi;n++) s.add(n);
+  });
+  return s;
+}
+function generateOneSet(cooldownSet, bandsArr, excludedSet){
+  excludedSet = excludedSet || new Set();
+  let main = new Set();
+  bandsArr.forEach(b=>{
+    pickFromBand(b, cooldownSet, excludedSet).forEach(n=>main.add(n));
+  });
+  let mainArr = Array.from(main);
+  const bandPool = bandRangePool(bandsArr);
+  // top up / trim to exactly 6 main numbers — strictly within this group's band ranges, never outside them, never excluded
+  let fullPool = [];
+  bandPool.forEach(n=>{ if(!cooldownSet.has(n) && !excludedSet.has(n) && !main.has(n)) fullPool.push(n); });
+
+  // Safety net: if cooldown has exhausted too much of the band-range pool to reach 6 numbers,
+  // relax the cooldown (but stay within band ranges AND still honor exclusions) rather than returning a broken/partial set.
+  if(mainArr.length + fullPool.length < 6){
+    fullPool = [];
+    bandPool.forEach(n=>{ if(!excludedSet.has(n) && !main.has(n)) fullPool.push(n); });
+  }
+
+  while(mainArr.length < 6 && fullPool.length){
+    const idx = randInt(0, fullPool.length-1);
+    mainArr.push(fullPool.splice(idx,1)[0]);
+  }
+  mainArr = mainArr.slice(0,6).sort((a,b)=>a-b);
+  // bonus: drawn from the same band ranges as the main numbers, so it respects your custom range too.
+  // Falls back to the full 1-52 pool only if the band pool has nothing left (e.g. a single-number band).
+  let bonus;
+  const bonusPool = Array.from(bandPool).filter(n=>!mainArr.includes(n) && !excludedSet.has(n));
+  if(bonusPool.length){
+    bonus = bonusPool[randInt(0, bonusPool.length-1)];
+  } else {
+    let tries=0;
+    do{ bonus = randInt(1,52); tries++; } while((mainArr.includes(bonus) || excludedSet.has(bonus)) && tries<300);
+  }
+  return {main: mainArr, bonus};
+}
+
+let generatedSets = [];
+let spendLedger = []; // {main, bonus, cost, date, removed} — persists across Clear/regenerate
+let costPerTicket = 5;
+let editingSetIndex = null;
+
+function generateSets(){
+  if(bandGroups.length===0 || bandGroups.every(g=>g.bands.length===0)){ alert('Add at least one band first.'); return; }
+  const count = Math.max(1, Math.min(3000, +document.getElementById('numSets').value || 5));
+  const cooldownRounds = Math.max(0, +document.getElementById('cooldown').value || 0);
+  const excludedSet = getExcludedSet();
+
+  // Preserve any locked sets in their existing positions; only regenerate unlocked ones.
+  const lockedSets = generatedSets.filter(s=>s.locked);
+  const newSets = [];
+  let recentHistory = lockedSets.map(s=>[...s.main, s.bonus]);
+  const toGenerate = Math.max(0, count - lockedSets.length);
+
+  for(let i=0;i<toGenerate;i++){
+    // Alternate band groups every 5 sets (5 from group 0, 5 from group 1, 5 from group 0, ...)
+    const groupIdx = Math.floor(i/5) % bandGroups.length;
+    const groupBands = bandGroups[groupIdx].bands.length ? bandGroups[groupIdx].bands : bandGroups.find(g=>g.bands.length)?.bands || [];
+    const cooldownSet = new Set();
+    recentHistory.slice(-cooldownRounds).forEach(arr=>arr.forEach(n=>cooldownSet.add(n)));
+    const set = generateOneSet(cooldownSet, groupBands, excludedSet);
+    set.locked = false;
+    set.groupName = bandGroups[groupIdx].name;
+    newSets.push(set);
+    recentHistory.push([...set.main, set.bonus]);
+  }
+  generatedSets = [...lockedSets, ...newSets];
+  editingSetIndex = null;
+  renderSets();
+}
+
+function clearSets(){
+  generatedSets = [];
+  editingSetIndex = null;
+  renderSets();
+  document.getElementById('matchSummary').textContent='';
+}
+
+function toggleEditSet(i){
+  editingSetIndex = (editingSetIndex===i) ? null : i;
+  renderSets();
+}
+function toggleLockSet(i){
+  generatedSets[i].locked = !generatedSets[i].locked;
+  if(generatedSets[i].locked && editingSetIndex===i) editingSetIndex=null;
+  renderSets();
+}
+function updateSetNumber(i, pos, value){
+  const v = Math.max(1, Math.min(52, +value || 1));
+  if(pos==='bonus') generatedSets[i].bonus = v;
+  else generatedSets[i].main[pos] = v;
+}
+
+function renderSets(){
+  const out = document.getElementById('setsOutput');
+  if(generatedSets.length===0){
+    out.innerHTML = '<div class="empty">No sets yet — configure bands and tap Generate.</div>';
+    renderSheetView();
+    return;
+  }
+  out.innerHTML = generatedSets.map((s,i)=>{
+    const editing = editingSetIndex===i;
+    const locked = !!s.locked;
+    let balls;
+    if(editing){
+      const mainInputs = s.main.map((n,pos)=>`<input class="ball-edit" type="number" min="1" max="52" value="${n}" data-set="${i}" data-n="${n}" onchange="updateSetNumber(${i},${pos},this.value)">`).join('');
+      const bonusInput = `<input class="ball-edit" type="number" min="1" max="52" value="${s.bonus}" data-set="${i}" data-n="${s.bonus}" onchange="updateSetNumber(${i},'bonus',this.value)" style="border-color:var(--accent2);color:var(--accent2);">`;
+      balls = mainInputs + bonusInput;
+    } else {
+      const mainBalls = s.main.map(n=>`<div class="ball" data-n="${n}" data-set="${i}">${n}</div>`).join('');
+      const bonusBall = `<div class="ball bonus" data-n="${s.bonus}" data-set="${i}">${s.bonus}</div>`;
+      balls = mainBalls + bonusBall;
+    }
+    const tools = `<div class="set-tools">
+        <button class="confirm-btn${s.played?' on':''}" onclick="confirmPlay(${i})" title="Confirm this ticket was actually played">${s.played?'✓':'✓'}</button>
+        <button class="${editing?'on':''}" onclick="toggleEditSet(${i})" ${locked?'disabled style=\"opacity:.3\"':''} title="Edit">✏️</button>
+        <button class="${locked?'on':''}" onclick="toggleLockSet(${i})" title="Lock">${locked?'🔒':'🔓'}</button>
+      </div>`;
+    return `<div class="set-row${locked?' locked':''}"><span class="set-index">#${i+1}${s.groupName?`<span class="set-index-group">${s.groupName.slice(0,4)}</span>`:''}</span>${balls}${tools}</div>`;
+  }).join('');
+  applyViewToggles();
+  renderSheetView();
+}
+
+/* =========================================================
+   CONFIRMED PLAYS & SPEND — persists across Clear/regenerate
+   ========================================================= */
+function confirmPlay(i){
+  const s = generatedSets[i];
+  if(!s) return;
+  if(s.played && s.ledgerRef!=null){
+    // un-confirm: remove the ledger entry
+    if(spendLedger[s.ledgerRef]) spendLedger[s.ledgerRef].removed = true;
+    s.played = false;
+    s.ledgerRef = null;
+  } else {
+    spendLedger.push({
+      main: [...s.main], bonus: s.bonus, cost: costPerTicket,
+      date: new Date().toISOString(), removed: false
+    });
+    s.played = true;
+    s.ledgerRef = spendLedger.length - 1;
+  }
+  renderSets();
+  renderSpendLedger();
+}
+function removeLedgerEntry(idx){
+  if(spendLedger[idx]) spendLedger[idx].removed = true;
+  // clear the played flag on any currently-visible set that pointed to this entry
+  generatedSets.forEach(s=>{ if(s.ledgerRef===idx){ s.played=false; s.ledgerRef=null; } });
+  renderSets();
+  renderSpendLedger();
+}
+function resetSpendLedger(){
+  if(spendLedger.filter(e=>!e.removed).length===0){ spendLedger=[]; renderSpendLedger(); return; }
+  if(!confirm('Reset the spend tally for this game? This clears your confirmed-play history and cannot be undone.')) return;
+  spendLedger = [];
+  generatedSets.forEach(s=>{ s.played=false; s.ledgerRef=null; });
+  renderSets();
+  renderSpendLedger();
+}
+function renderSpendLedger(){
+  const countEl = document.getElementById('tallyCount');
+  const spendEl = document.getElementById('tallySpend');
+  const logEl = document.getElementById('spendLog');
+  const costInput = document.getElementById('costPerTicket');
+  if(!countEl) return;
+  if(costInput) costInput.value = costPerTicket;
+  const active = spendLedger.map((e,idx)=>({...e, idx})).filter(e=>!e.removed);
+  const total = active.reduce((sum,e)=>sum+(+e.cost||0),0);
+  countEl.textContent = active.length;
+  spendEl.textContent = 'R' + total.toLocaleString();
+  if(active.length===0){
+    logEl.innerHTML = '<div class="hint">No confirmed plays yet — tap ✓ on a generated set once you actually buy that ticket.</div>';
+    return;
+  }
+  logEl.innerHTML = active.slice().reverse().map(e=>{
+    const balls = [...e.main, e.bonus].map(n=>`<div class="ball" style="width:26px;height:26px;font-size:10px;">${n}</div>`).join('');
+    const d = e.date ? new Date(e.date).toLocaleDateString() : '';
+    return `<div class="spend-row">${balls}<span class="spend-date">${d}</span><span class="spend-cost">R${(+e.cost||0).toLocaleString()}</span><button class="spend-rm" onclick="removeLedgerEntry(${e.idx})" title="Remove">✕</button></div>`;
+  }).join('');
+}
+
+/* =========================================================
+   EXCEL / SHEETS VIEW
+   ========================================================= */
+function renderSheetView(){
+  const holder = document.getElementById('sheetView');
+  if(!holder) return;
+  if(generatedSets.length===0){
+    holder.innerHTML = '<div class="empty">No sets yet — generate some above.</div>';
+    return;
+  }
+  const cols = generatedSets[0].main.length;
+  let head = '<tr><th class="corner">#</th>' + Array.from({length:cols},(_,c)=>`<th>N${c+1}</th>`).join('') + '<th>Bonus</th></tr>';
+  let body = generatedSets.map((s,i)=>{
+    const mainCells = s.main.map(n=>`<td class="sheet-cell" data-n="${n}" data-set="${i}">${n}</td>`).join('');
+    const bonusCell = `<td class="sheet-cell bonus-col" data-n="${s.bonus}" data-set="${i}">${s.bonus}</td>`;
+    return `<tr><td class="row-head${s.locked?' locked-row':''}">#${i+1}${s.locked?' 🔒':''}</td>${mainCells}${bonusCell}</tr>`;
+  }).join('');
+  holder.innerHTML = `<table class="sheet-table"><thead>${head}</thead><tbody>${body}</tbody></table>`;
+  applyViewToggles();
+}
+function copySheetToClipboard(){
+  if(generatedSets.length===0){ alert('No sets to copy — generate some first.'); return; }
+  const cols = generatedSets[0].main.length;
+  const header = ['#', ...Array.from({length:cols},(_,c)=>'N'+(c+1)), 'Bonus'].join('\t');
+  const rows = generatedSets.map((s,i)=>[`#${i+1}`, ...s.main, s.bonus].join('\t'));
+  const text = [header, ...rows].join('\n');
+  navigator.clipboard.writeText(text).then(()=>alert('Copied — paste directly into Excel or Google Sheets.')).catch(()=>{
+    prompt('Copy this text manually:', text);
+  });
+}
+async function pasteSheetFromClipboard(){
+  let text;
+  try{
+    text = await navigator.clipboard.readText();
+  }catch(e){
+    text = prompt('Clipboard access was blocked. Paste your table here:');
+    if(!text) return;
+  }
+  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+  const newSets = [];
+  lines.forEach(line=>{
+    const tokens = line.split(/[\t,]+|\s{2,}/).map(s=>s.trim()).filter(Boolean);
+    const nums = tokens.map(t=>+t.replace('#','')).filter(n=>!isNaN(n) && n>=1 && n<=52);
+    if(nums.length>=6){
+      newSets.push({ main: nums.slice(0,6).sort((a,b)=>a-b), bonus: nums[6] ?? nums[nums.length-1], locked:false });
+    }
+  });
+  if(newSets.length===0){ alert('Could not find any valid rows (need at least 6 numbers 1–52 per line).'); return; }
+  generatedSets = newSets;
+  editingSetIndex = null;
+  renderSets();
+  document.getElementById('saveStatus').textContent = `Pasted ${newSets.length} set(s) from clipboard into the table.`;
+}
+
+/* ===== VIEW TOGGLES ===== */
+let activeVT = new Set();
+function toggleVT(key){
+  if(activeVT.has(key)) activeVT.delete(key); else activeVT.add(key);
+  document.querySelectorAll('.vt-btn').forEach(b=>b.classList.toggle('active', activeVT.has(b.dataset.vt)));
+  applyViewToggles();
+}
+function findClusters(mainSorted){
+  // runs of consecutive integers within a set's main numbers
+  const runs = [];
+  let run = [mainSorted[0]];
+  for(let i=1;i<mainSorted.length;i++){
+    if(mainSorted[i] - mainSorted[i-1] === 1){ run.push(mainSorted[i]); }
+    else { runs.push(run); run=[mainSorted[i]]; }
+  }
+  runs.push(run);
+  return runs; // array of arrays
+}
+function applyViewToggles(){
+  document.querySelectorAll('.ball, .sheet-cell').forEach(b=>{
+    b.classList.remove('vt-lower','vt-upper','vt-odd','vt-even','vt-c2','vt-c3','vt-c4');
+  });
+  if(activeVT.size===0) return;
+
+  // priority: cluster checks first (per-set), then odd/even, then half
+  generatedSets.forEach((s,i)=>{
+    const sorted = [...s.main].sort((a,b)=>a-b);
+    const runs = findClusters(sorted);
+    runs.forEach(run=>{
+      let cls = null;
+      if(run.length>=4 && activeVT.has('c4')) cls='vt-c4';
+      else if(run.length===3 && activeVT.has('c3')) cls='vt-c3';
+      else if(run.length===2 && activeVT.has('c2')) cls='vt-c2';
+      if(cls){
+        run.forEach(n=>{
+          document.querySelectorAll(`.ball[data-set="${i}"][data-n="${n}"], .sheet-cell[data-set="${i}"][data-n="${n}"]`).forEach(el=>el.classList.add(cls));
+        });
+      }
+    });
+  });
+
+  document.querySelectorAll('.ball, .sheet-cell').forEach(el=>{
+    if(el.classList.contains('vt-c2')||el.classList.contains('vt-c3')||el.classList.contains('vt-c4')) return;
+    const n = +el.dataset.n;
+    if(activeVT.has('odd') && n%2!==0) el.classList.add('vt-odd');
+    else if(activeVT.has('even') && n%2===0) el.classList.add('vt-even');
+    else if(activeVT.has('lower') && n<=26) el.classList.add('vt-lower');
+    else if(activeVT.has('upper') && n>26) el.classList.add('vt-upper');
+  });
+}
+
+/* =========================================================
+   MATCH CHECKER — 7-number flat pool comparison
+   ========================================================= */
+function renderDrawInputs(){
+  const holder = document.getElementById('drawInputs');
+  holder.innerHTML='';
+  for(let i=0;i<7;i++){
+    const input = document.createElement('input');
+    input.type='number'; input.min=1; input.max=52;
+    input.placeholder = i<6 ? (i+1) : 'B';
+    input.id = 'draw'+i;
+    holder.appendChild(input);
+  }
+}
+
+function checkMatches(){
+  const drawNums = [];
+  for(let i=0;i<7;i++){
+    const v = +document.getElementById('draw'+i).value;
+    if(v>=1 && v<=52) drawNums.push(v);
+  }
+  if(drawNums.length===0){ alert('Enter the official draw numbers first.'); return; }
+  const drawSet = new Set(drawNums);
+
+  document.querySelectorAll('.ball, .sheet-cell').forEach(ball=>{
+    const n = +ball.dataset.n;
+    ball.classList.toggle('match', drawSet.has(n));
+  });
+
+  let totalMatches = 0, bestSet = 0, bestCount = 0;
+  generatedSets.forEach((s,i)=>{
+    const flat = [...s.main, s.bonus];
+    const hits = flat.filter(n=>drawSet.has(n)).length;
+    totalMatches += hits;
+    if(hits>bestCount){ bestCount=hits; bestSet=i+1; }
+  });
+  document.getElementById('matchSummary').innerHTML =
+    generatedSets.length
+    ? `Checked ${generatedSets.length} sets · Best: <b>Set #${bestSet} (${bestCount}/7)</b> · Total hits across all sets: <b>${totalMatches}</b>`
+    : 'Generate some sets first, then check matches.';
+}
+
+function clearDraw(){
+  for(let i=0;i<7;i++) document.getElementById('draw'+i).value='';
+  document.querySelectorAll('.ball, .sheet-cell').forEach(ball=>ball.classList.remove('match'));
+  document.getElementById('matchSummary').textContent='';
+}
+
+/* =========================================================
+   P&L DASHBOARD
+   ========================================================= */
+function divisionForMatch(mainMatches, bonusMatch){
+  if(mainMatches===6) return 1;
+  if(mainMatches===5 && bonusMatch) return 2;
+  if(mainMatches===5) return 3;
+  if(mainMatches===4 && bonusMatch) return 4;
+  if(mainMatches===4) return 5;
+  if(mainMatches===3 && bonusMatch) return 6;
+  if(mainMatches===3) return 7;
+  if(mainMatches===2 && bonusMatch) return 8;
+  return 0;
+}
+
+function calcPL(){
+  if(generatedSets.length===0){ alert('Generate some sets first.'); return; }
+  const drawNums = [];
+  for(let i=0;i<7;i++){
+    const v = +document.getElementById('draw'+i).value;
+    if(v>=1 && v<=52) drawNums.push(v);
+  }
+  if(drawNums.length<7){ alert('Enter all 7 official draw numbers (6 main + bonus) in Match Checker first.'); return; }
+  const officialMain = drawNums.slice(0,6);
+  const officialBonus = drawNums[6];
+
+  const prizes = {1:+plVal('plDiv1'),2:+plVal('plDiv2'),3:+plVal('plDiv3'),4:+plVal('plDiv4'),
+                   5:+plVal('plDiv5'),6:+plVal('plDiv6'),7:+plVal('plDiv7'),8:+plVal('plDiv8')};
+  const costPerLine = +plVal('plCost');
+
+  const divCounts = {1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0};
+  let totalWin = 0;
+
+  generatedSets.forEach(s=>{
+    const mainMatches = s.main.filter(n=>officialMain.includes(n)).length;
+    const bonusMatch = s.main.includes(officialBonus);
+    const div = divisionForMatch(mainMatches, bonusMatch);
+    if(div>0){ divCounts[div]++; totalWin += prizes[div]; }
+  });
+
+  const totalCost = generatedSets.length * costPerLine;
+  const net = totalWin - totalCost;
+
+  document.getElementById('plSummary').style.display='flex';
+  document.getElementById('plCostVal').textContent = 'R'+totalCost.toLocaleString();
+  document.getElementById('plWinVal').textContent = 'R'+totalWin.toLocaleString();
+
+  // bar chart
+  const maxVal = Math.max(totalCost, totalWin, 1);
+  const costH = (totalCost/maxVal)*90;
+  const winH = (totalWin/maxVal)*90;
+  const chart = document.getElementById('plChart');
+  chart.style.display='block';
+  chart.innerHTML = `
+    <rect x="60" y="${120-costH}" width="60" height="${costH}" fill="var(--bad)" rx="6"></rect>
+    <text x="90" y="${115-costH}" fill="var(--text)" font-size="11" text-anchor="middle" font-weight="700">R${totalCost.toLocaleString()}</text>
+    <text x="90" y="132" fill="var(--text-dim)" font-size="10" text-anchor="middle">COST</text>
+    <rect x="170" y="${120-winH}" width="60" height="${winH}" fill="var(--good)" rx="6"></rect>
+    <text x="200" y="${115-winH}" fill="var(--text)" font-size="11" text-anchor="middle" font-weight="700">R${totalWin.toLocaleString()}</text>
+    <text x="200" y="132" fill="var(--text-dim)" font-size="10" text-anchor="middle">WINNINGS</text>
+    <line x1="20" y1="120" x2="280" y2="120" stroke="var(--border)" stroke-width="1"></line>
+  `;
+
+  const divLabels = {1:'Div 1 (6 main)',2:'Div 2 (5+bonus)',3:'Div 3 (5 main)',4:'Div 4 (4+bonus)',
+                      5:'Div 5 (4 main)',6:'Div 6 (3+bonus)',7:'Div 7 (3 main)',8:'Div 8 (2+bonus)'};
+  const netLabel = net>=0 ? `Net Profit: <b style="color:var(--good)">R${net.toLocaleString()}</b>` : `Net Loss: <b style="color:var(--bad)">R${Math.abs(net).toLocaleString()}</b>`;
+  document.getElementById('plDivs').innerHTML =
+    `<div class="div-row"><span>${netLabel}</span><span></span></div>` +
+    Object.keys(divLabels).map(d=>`<div class="div-row"><span>${divLabels[d]}</span><b>${divCounts[d]} hit${divCounts[d]!==1?'s':''}</b></div>`).join('');
+}
+function plVal(id){ return document.getElementById(id).value || 0; }
+
+/* =========================================================
+   GAME SELECT — SA Lotto / Lotto Plus 1 / Lotto Max each keep
+   their own bands, generated sets, pattern grid, and hot/cold grid.
+   ========================================================= */
+let activeGame = 'salotto';
+let gameStates = { salotto:null, plus1:null, max:null };
+
+function snapshotCurrentGameState(){
+  return { bandGroups, activeGroupIndex, generatedSets, patternGrid, hotColdGrid, editingSetIndex, spendLedger, costPerTicket };
+}
+function loadGameStateVars(state){
+  bandGroups = state.bandGroups;
+  activeGroupIndex = state.activeGroupIndex;
+  generatedSets = state.generatedSets;
+  patternGrid = state.patternGrid;
+  hotColdGrid = state.hotColdGrid;
+  editingSetIndex = state.editingSetIndex;
+  spendLedger = state.spendLedger || [];
+  costPerTicket = state.costPerTicket!=null ? state.costPerTicket : 5;
+}
+function freshGameState(){
+  seedDefaultBandGroups(); // sets bandGroups/activeGroupIndex on the live variables
+  generatedSets = [];
+  editingSetIndex = null;
+  patternGrid = Array.from({length:5},()=>Array(7).fill(''));
+  hotColdGrid = { labels:['Hot Numbers','Cold Numbers','Prediction A','Prediction B'], rows: Array.from({length:4},()=>Array(7).fill('')) };
+  spendLedger = [];
+  costPerTicket = 5;
+  return snapshotCurrentGameState();
+}
+function switchGame(key){
+  if(key===activeGame) return;
+  gameStates[activeGame] = snapshotCurrentGameState();
+  activeGame = key;
+  if(!gameStates[key]) gameStates[key] = freshGameState();
+  loadGameStateVars(gameStates[key]);
+
+  document.querySelectorAll('#gameSeg button').forEach(b=>b.classList.toggle('active', b.dataset.game===key));
+  renderGroupTabs();
+  renderBands();
+  renderSets();
+  renderPatternGrid();
+  renderHotColdGrid();
+  renderSpendLedger();
+
+  // Keep Historical Draws tab in sync with the selected game
+  if(typeof switchHistTab === 'function'){
+    activeHistTab = key;
+    document.querySelectorAll('#histTabs button').forEach(b=>b.classList.toggle('active', b.dataset.h===key));
+    renderHistList();
+    if(document.getElementById('freqGrid')) renderFrequencyGrid();
+  }
+}
+
+/* =========================================================
+   HISTORICAL IMPORT
+   ========================================================= */
+const DEFAULT_HISTORICAL_DATA = {
+  salotto: [
+    {main:[4,15,22,24,41,52],bonus:48,date:'2026-07-29'},{main:[9,13,26,28,29,43],bonus:5,date:'2026-07-25'},{main:[2,4,28,32,34,35],bonus:23,date:'2026-07-22'},
+    {main:[10,25,40,41,47,48],bonus:49,date:'2026-07-18'},{main:[23,39,47,48,49,51],bonus:21,date:'2026-07-15'},{main:[8,14,20,33,34,47],bonus:42,date:'2026-07-11'},
+    {main:[11,13,21,22,29,36],bonus:47,date:'2026-07-08'},{main:[2,10,21,37,42,43],bonus:34,date:'2026-06-27'},{main:[12,23,42,46,48,51],bonus:18,date:'2026-06-24'},
+    {main:[1,19,20,22,47,50],bonus:32,date:'2026-06-20'},{main:[8,34,36,42,51,52],bonus:18,date:'2026-06-17'},{main:[4,7,19,26,49,50],bonus:46,date:'2026-06-13'},
+    {main:[15,16,17,18,25,33],bonus:3,date:'2026-06-10'},{main:[8,16,20,40,50,51],bonus:22,date:'2026-06-06'},{main:[21,35,39,46,51,56],bonus:4,date:'2026-05-30'},
+    {main:[8,17,29,35,38,56],bonus:50,date:'2026-05-27'},{main:[33,39,45,47,49,53],bonus:34,date:'2026-05-23'},{main:[1,4,12,13,24,58],bonus:53,date:'2026-05-20'},
+    {main:[34,40,42,45,56,58],bonus:52,date:'2026-05-16'},{main:[1,22,37,40,51,58],bonus:43,date:'2026-05-13'},{main:[18,21,24,45,52,56],bonus:53,date:'2026-05-09'},
+    {main:[9,22,26,30,50,54],bonus:42,date:'2026-04-25'},{main:[10,12,23,26,27,37],bonus:5,date:'2026-04-22'},{main:[23,25,31,48,52,53],bonus:8,date:'2026-04-18'},
+    {main:[1,2,10,22,27,54],bonus:55,date:'2026-04-15'},{main:[15,41,43,45,57,58],bonus:1,date:'2026-04-11'},{main:[2,23,40,43,48,53],bonus:55,date:'2026-04-08'},
+    {main:[11,13,15,30,39,48],bonus:8,date:'2026-04-04'},{main:[14,18,27,29,52,56],bonus:10,date:'2026-04-01'},{main:[6,12,26,40,41,55],bonus:17,date:'2026-03-28'},
+    {main:[1,12,19,28,31,52],bonus:38,date:'2026-03-25'},{main:[3,7,16,22,42,53],bonus:9,date:'2026-03-21'},{main:[4,24,26,45,46,49],bonus:5,date:'2026-03-18'},
+    {main:[12,22,30,32,42,58],bonus:57,date:'2026-03-14'},{main:[2,5,49,54,56,58],bonus:46,date:'2026-03-11'},{main:[4,13,14,20,22,47],bonus:29,date:'2026-03-07'},
+    {main:[1,10,11,17,37,57],bonus:25,date:'2026-03-04'},{main:[2,7,15,33,38,48],bonus:5,date:'2026-02-28'},{main:[7,11,12,32,38,55],bonus:20,date:'2026-02-25'},
+    {main:[2,8,39,43,45,55],bonus:6,date:'2026-02-21'},{main:[6,13,22,36,50,56],bonus:28,date:'2026-02-18'},{main:[6,10,18,32,37,46],bonus:53,date:'2026-02-14'},
+    {main:[14,16,22,24,29,35],bonus:3,date:'2026-02-11'},{main:[1,3,12,21,48,51],bonus:30,date:'2026-02-07'},{main:[3,17,20,26,51,53],bonus:22,date:'2026-02-04'},
+    {main:[15,32,36,39,40,48],bonus:28,date:'2026-01-31'},{main:[9,18,19,36,37,49],bonus:50,date:'2026-01-28'},{main:[7,23,28,37,50,58],bonus:19,date:'2026-01-24'},
+    {main:[9,18,32,35,54,56],bonus:2,date:'2026-01-21'},{main:[24,32,38,49,55,58],bonus:51,date:'2026-01-17'}
+  ],
+  plus1: [
+    {main:[11,14,19,21,33,39],bonus:37,date:'2026-07-22'},{main:[11,12,22,35,48,50],bonus:26,date:'2026-07-15'},{main:[3,22,25,38,40,46],bonus:23,date:'2026-07-11'},
+    {main:[15,20,21,28,29,34],bonus:31,date:'2026-07-08'},{main:[3,17,40,42,44,52],bonus:24,date:'2026-07-04'},{main:[3,4,5,6,19,33],bonus:18,date:'2026-07-01'},
+    {main:[3,9,10,13,23,47],bonus:52,date:'2026-06-27'},{main:[4,16,17,44,49,50],bonus:51,date:'2026-06-24'},{main:[7,23,32,37,43,45],bonus:50,date:'2026-06-20'},
+    {main:[1,12,19,26,27,28],bonus:13,date:'2026-06-17'},{main:[11,12,35,44,45,46],bonus:41,date:'2026-06-06'},{main:[2,28,45,49,51,52],bonus:23,date:'2026-06-03'},
+    {main:[9,16,25,44,50,54],bonus:53,date:'2026-05-30'},{main:[5,31,46,47,55,58],bonus:3,date:'2026-05-27'},{main:[9,16,22,27,30,41],bonus:52,date:'2026-05-23'},
+    {main:[14,46,47,51,54,55],bonus:41,date:'2026-05-20'},{main:[9,11,15,34,49,53],bonus:38,date:'2026-05-16'},{main:[18,22,32,35,46,50],bonus:11,date:'2026-05-13'},
+    {main:[8,27,36,43,48,52],bonus:54,date:'2026-05-09'},{main:[11,22,26,31,49,53],bonus:20,date:'2026-05-06'},{main:[17,30,33,35,39,41],bonus:28,date:'2026-05-02'},
+    {main:[12,29,31,37,40,47],bonus:54,date:'2026-04-29'},{main:[14,18,30,43,46,55],bonus:28,date:'2026-04-25'},{main:[20,26,32,48,50,57],bonus:34,date:'2026-04-22'},
+    {main:[1,4,8,40,41,57],bonus:19,date:'2026-04-18'},{main:[3,4,6,9,12,37],bonus:21,date:'2026-04-15'},{main:[7,14,17,21,40,53],bonus:19,date:'2026-04-11'}
+  ],
+  max: []
+};
+let historicalData = JSON.parse(JSON.stringify(DEFAULT_HISTORICAL_DATA));
+
+// Fills in dates on restored/older saves that predate the Draw ID/Date feature,
+// matching entries against the shipped defaults by position (same main+bonus, no date).
+function backfillMissingDates(){
+  ['salotto','plus1'].forEach(key=>{
+    const arr = historicalData[key];
+    const seed = DEFAULT_HISTORICAL_DATA[key];
+    if(!arr || !seed) return;
+    arr.forEach((d,i)=>{
+      if(!d.date && seed[i] && seed[i].date &&
+         JSON.stringify(d.main)===JSON.stringify(seed[i].main) && d.bonus===seed[i].bonus){
+        d.date = seed[i].date;
+      }
+    });
+  });
+}
+let activeHistTab = 'salotto';
+let gridSelection = [];
+let activeHistVT = new Set();
+
+function switchHistTab(tab){
+  activeHistTab = tab;
+  document.querySelectorAll('#histTabs button').forEach(b=>b.classList.toggle('active', b.dataset.h===tab));
+  renderHistList();
+  if(document.getElementById('freqGrid')) renderFrequencyGrid();
+  const lbl = document.getElementById('syncFileLabel');
+  if(lbl) lbl.textContent = tab + '.csv';
+}
+function switchHistSub(sub){
+  document.querySelectorAll('.hist-subtabs button').forEach(b=>b.classList.toggle('active', b.dataset.sub===sub));
+  document.querySelectorAll('.hist-pane').forEach(p=>p.classList.remove('open'));
+  document.getElementById('pane-'+sub).classList.add('open');
+  if(sub==='grid') renderNumGrid();
+  if(sub==='list') renderHistList();
+}
+
+function parseLineToDraw(line){
+  const tokens = line.split(/[,\s]+/).map(s=>s.trim()).filter(Boolean);
+  const datePattern = /^\d{4}-\d{1,2}-\d{1,2}$|^\d{1,2}\/\d{1,2}\/\d{4}$/;
+  const nums = [];
+  let drawId = null, date = null;
+  tokens.forEach(t=>{
+    const num = +t;
+    if(t!=='' && !isNaN(num) && Number.isInteger(num) && num>=1 && num<=52){
+      nums.push(num);
+    } else if(datePattern.test(t)){
+      date = normalizeDateToken(t);
+    } else if(drawId===null){
+      drawId = t;
+    }
+  });
+  if(nums.length < 6) return null;
+  const draw = {main: nums.slice(0,6), bonus: nums[6] ?? null};
+  if(drawId) draw.drawId = drawId;
+  if(date) draw.date = date;
+  return draw;
+}
+function normalizeDateToken(t){
+  if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(t)){
+    const [y,m,d] = t.split('-');
+    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+  }
+  if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(t)){
+    const [d,m,y] = t.split('/'); // assumes DD/MM/YYYY
+    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+  }
+  return t;
+}
+
+/* =========================================================
+   DIRECTORY & AUTO-SYNC — link a local folder and pull CSVs
+   straight into Historical Draws for the active game.
+   ========================================================= */
+let directoryHandle = null;
+async function linkLocalDirectory(){
+  if(!('showDirectoryPicker' in window)){
+    alert('Your browser doesn\'t support folder linking — this needs Chrome or Samsung Internet on Android.');
+    return;
+  }
+  try{
+    directoryHandle = await window.showDirectoryPicker();
+    const pill = document.getElementById('dirStatus');
+    pill.textContent = 'Connected: ' + directoryHandle.name;
+    pill.classList.add('connected');
+  }catch(err){
+    if(err.name !== 'AbortError') alert('Could not link folder: ' + err.message);
+  }
+}
+async function syncActiveGameFile(){
+  if(!directoryHandle){ alert('Link a local directory first.'); return; }
+  const fileName = activeHistTab + '.csv';
+  try{
+    const fileHandle = await directoryHandle.getFileHandle(fileName);
+    const file = await fileHandle.getFile();
+    const text = await file.text();
+    const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+    let added = 0;
+    lines.forEach(line=>{
+      const d = parseLineToDraw(line);
+      if(d){ historicalData[activeHistTab].push(d); added++; }
+    });
+    if(added===0){ alert(`No valid draw rows found in ${fileName}.`); return; }
+    switchHistSub('list');
+    document.getElementById('saveStatus').textContent = `Synced ${added} draw(s) from ${fileName}.`;
+  }catch(err){
+    alert(`Could not read "${fileName}" from the linked folder — make sure it exists there.`);
+  }
+}
+function parsePasteArea(){
+  const text = document.getElementById('pasteArea').value.trim();
+  if(!text){ alert('Paste or type some draw rows first.'); return; }
+  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+  let added = 0;
+  lines.forEach(line=>{
+    const d = parseLineToDraw(line);
+    if(d){ historicalData[activeHistTab].push(d); added++; }
+  });
+  if(added===0){ alert('No valid draw rows found — each line needs at least 6 numbers between 1–52.'); return; }
+  document.getElementById('pasteArea').value='';
+  switchHistSub('list');
+}
+async function pasteFromClipboard(){
+  try{
+    const text = await navigator.clipboard.readText();
+    const ta = document.getElementById('pasteArea');
+    ta.value = ta.value ? ta.value+'\n'+text : text;
+  }catch(e){
+    alert('Clipboard access was blocked by the browser. Long-press the text box and paste manually instead.');
+  }
+}
+function handleFileUpload(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    document.getElementById('pasteArea').value = e.target.result;
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+/* ---- 1-52 grids: one per lottery, all shown together, with live tap-tally ---- */
+const HIST_TAB_LABELS = {salotto:'SA Lotto', plus1:'Lotto Plus 1', max:'Lotto Max'};
+let gridTally = {salotto:{}, plus1:{}, max:{}};
+
+function renderNumGrid(){
+  const holder = document.getElementById('tripleGridHolder');
+  holder.innerHTML = Object.keys(HIST_TAB_LABELS).map(key=>{
+    const tally = gridTally[key];
+    let cells = '';
+    for(let n=1;n<=52;n++){
+      const count = tally[n]||0;
+      const cls = count>=2 ? 'grid-cell rep' : (count===1 ? 'grid-cell sel' : 'grid-cell');
+      const badge = count>=2 ? `<span class="tally-badge">${count}×</span>` : '';
+      cells += `<div class="${cls}" onclick="tapGridNum('${key}',${n})">${n}${badge}</div>`;
+    }
+    const distinct = Object.keys(tally).filter(k=>tally[k]>0).length;
+    return `<div class="triple-grid-block">
+      <h4>${HIST_TAB_LABELS[key]}</h4>
+      <div class="grid-status">Tap numbers to tally taps · <b>${distinct}</b> distinct selected · tap again to mark a repeat</div>
+      <div class="num-grid">${cells}</div>
+      <div class="live-status">
+        <div class="live-box">Unique<b>${countByTallyState(key,1)}</b></div>
+        <div class="live-box">Repeated<b>${countByTallyState(key,2)}</b></div>
+      </div>
+      <div id="liveUnique-${key}"></div>
+      <div class="analysis-sep"><div class="line"></div><span>Repeated</span><div class="line"></div></div>
+      <div id="liveRepeated-${key}"></div>
+      <div class="actions" style="margin-top:8px;">
+        <button class="btn btn-primary" onclick="addGridSelection('${key}')">Add Draw</button>
+        <button class="btn btn-secondary" onclick="clearGridSelection('${key}')">Clear</button>
+      </div>
+    </div>`;
+  }).join('');
+  Object.keys(HIST_TAB_LABELS).forEach(key=>renderLiveLists(key));
+}
+function countByTallyState(key, state){
+  const tally = gridTally[key];
+  return Object.keys(tally).filter(n=>state===1 ? tally[n]===1 : tally[n]>=2).length;
+}
+function renderLiveLists(key){
+  const tally = gridTally[key];
+  const unique = Object.keys(tally).filter(n=>tally[n]===1).map(Number).sort((a,b)=>a-b);
+  const repeated = Object.keys(tally).filter(n=>tally[n]>=2).map(Number).sort((a,b)=>a-b);
+  renderNumberBands('liveUnique-'+key, unique);
+  renderNumberBands('liveRepeated-'+key, repeated);
+}
+function tapGridNum(key, n){
+  gridTally[key][n] = (gridTally[key][n]||0) + 1;
+  renderNumGrid();
+}
+function addGridSelection(key){
+  const tally = gridTally[key];
+  const distinctNums = Object.keys(tally).filter(n=>tally[n]>0).map(Number).sort((a,b)=>a-b);
+  if(distinctNums.length<6){ alert('Tap at least 6 distinct numbers (6 main, optionally +1 bonus).'); return; }
+  historicalData[key].push({main: distinctNums.slice(0,6), bonus: distinctNums[6] ?? null});
+  gridTally[key] = {};
+  renderNumGrid();
+  activeHistTab = key;
+  document.querySelectorAll('#histTabs button').forEach(b=>b.classList.toggle('active', b.dataset.h===key));
+  switchHistSub('list');
+}
+function clearGridSelection(key){
+  gridTally[key] = {};
+  renderNumGrid();
+}
+
+/* ---- historical list + view toggles (mirrors generated-set logic) ---- */
+let selectedHistRows = {salotto:new Set(), plus1:new Set(), max:new Set()};
+
+function populateHistRangeOptions(){
+  const sel = document.getElementById('histRangeSelect');
+  if(!sel || sel.options.length) return; // populate once
+  const opts = [6,12,24,36];
+  let n = 36;
+  while(n < 3600){ n = Math.round(n*2); opts.push(Math.min(n,3600)); }
+  if(opts[opts.length-1] !== 3600) opts.push(3600);
+  sel.innerHTML = opts.map(v=>`<option value="${v}">Last ${v}</option>`).join('') + `<option value="all">All</option>`;
+  sel.value = 'all';
+}
+function renderHistList(){
+  populateHistRangeOptions();
+  const out = document.getElementById('histList');
+  const fullList = historicalData[activeHistTab] || [];
+  if(fullList.length===0){
+    out.innerHTML = '<div class="hist-empty">No historical draws yet — paste, upload, or use the 1–52 grid to add some.</div>';
+    document.getElementById('histAnalysis').style.display='none';
+    return;
+  }
+  const rangeVal = document.getElementById('histRangeSelect').value;
+  const limit = rangeVal==='all' ? fullList.length : Math.min(+rangeVal, fullList.length);
+  const list = fullList.slice(0, limit);
+  const picked = selectedHistRows[activeHistTab];
+  out.innerHTML = list.map((s,i)=>{
+    const balls = s.main.map(n=>`<div class="ball" data-n="${n}" data-set="${i}">${n}</div>`).join('');
+    const bonusBall = s.bonus!=null ? `<div class="ball bonus" data-n="${s.bonus}" data-set="${i}">${s.bonus}</div>` : '';
+    const checkBtn = s.bonus!=null ? `<button onclick="event.stopPropagation();useHistDrawInChecker(${i})" title="Use in Match Checker" style="width:26px;height:26px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text-dim);font-size:12px;padding:0;flex-shrink:0;">✓</button>` : '';
+    const isPicked = picked.has(i);
+    const meta = `<div class="hist-meta" onclick="event.stopPropagation()">
+        <input placeholder="Draw ID" value="${s.drawId||''}" onchange="updateHistMeta(${i},'drawId',this.value)">
+        <input type="date" value="${s.date||''}" onchange="updateHistMeta(${i},'date',this.value)">
+      </div>`;
+    return `<div class="set-row selectable${isPicked?' picked':''}" onclick="toggleHistRowSelect(${i})">
+      <div class="pick-box${isPicked?' on':''}">${isPicked?'✓':''}</div>
+      <span class="set-index">#${i+1}</span>${balls}${bonusBall}
+      <div class="set-tools">${checkBtn}</div>
+      ${meta}
+    </div>`;
+  }).join('');
+  applyHistViewToggles();
+  updateHistAnalysis();
+}
+function updateHistMeta(i, field, value){
+  const s = historicalData[activeHistTab][i];
+  if(s) s[field] = value;
+}
+function toggleHistRowSelect(i){
+  const set = selectedHistRows[activeHistTab];
+  if(set.has(i)) set.delete(i);
+  else {
+    if(set.size>=6){ alert('You can select up to 6 draws for this analysis — deselect one first.'); return; }
+    set.add(i);
+  }
+  renderHistList();
+}
+function renderNumberBands(containerId, numbers){
+  const el = document.getElementById(containerId);
+  if(numbers.length===0){ el.innerHTML='<div class="hint">None</div>'; return; }
+  let html='';
+  for(let i=0;i<numbers.length;i+=7){
+    const chunk = numbers.slice(i,i+7);
+    html += '<div class="band-out-row">' + chunk.map(n=>`<div class="ball">${n}</div>`).join('') + '</div>';
+  }
+  el.innerHTML = html;
+}
+function updateHistAnalysis(){
+  const set = selectedHistRows[activeHistTab];
+  const panel = document.getElementById('histAnalysis');
+  if(!set || set.size===0){ panel.style.display='none'; return; }
+  panel.style.display='block';
+  const list = historicalData[activeHistTab];
+  const freq = {};
+  set.forEach(idx=>{
+    const s = list[idx];
+    if(!s) return;
+    const nums = s.bonus!=null ? [...s.main, s.bonus] : [...s.main];
+    nums.forEach(n=>{ freq[n]=(freq[n]||0)+1; });
+  });
+  const drawnNums = Object.keys(freq).map(Number);
+  const left = [];
+  for(let n=1;n<=52;n++) if(!drawnNums.includes(n)) left.push(n);
+  const repeated = drawnNums.filter(n=>freq[n]>=2).sort((a,b)=>a-b);
+  document.getElementById('analysisStatus').textContent = `${set.size} of 6 draws selected`;
+  renderNumberBands('analysisLeft', left);
+  renderNumberBands('analysisRepeated', repeated);
+}
+/* =========================================================
+   COMMON COMBINATIONS — most frequent pairs/triplets/4-number
+   groups within this game's Historical Draws
+   ========================================================= */
+function getCombinations(arr, k){
+  const result = [];
+  function combine(start, combo){
+    if(combo.length===k){ result.push([...combo]); return; }
+    for(let i=start;i<arr.length;i++){
+      combo.push(arr[i]);
+      combine(i+1, combo);
+      combo.pop();
+    }
+  }
+  combine(0, []);
+  return result;
+}
+function computeCombos(size){
+  const draws = historicalData[activeHistTab];
+  if(!draws || draws.length===0){
+    alert('No historical draws for this game yet — add some in Historical Draws first.');
+    return;
+  }
+  const freq = {};
+  const lastSeen = {}; // key -> earliest draw index seen (0 = most recent)
+  draws.forEach((d,idx)=>{
+    const nums = [...d.main].sort((a,b)=>a-b);
+    if(nums.length < size) return;
+    getCombinations(nums, size).forEach(c=>{
+      const key = c.join(',');
+      freq[key] = (freq[key]||0) + 1;
+      if(lastSeen[key]===undefined) lastSeen[key] = idx;
+    });
+  });
+  const ranked = Object.entries(freq)
+    .filter(([,count])=>count>=2)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,15);
+  renderComboResults(ranked, size, draws.length, lastSeen);
+}
+function renderComboResults(ranked, size, totalDraws, lastSeen){
+  const holder = document.getElementById('comboResults');
+  const labels = {2:'Pairs', 3:'Triplets', 4:'4-Number Combos'};
+  if(ranked.length===0){
+    holder.innerHTML = `<div class="empty">No repeating ${labels[size].toLowerCase()} found across ${totalDraws} draw${totalDraws!==1?'s':''} — try adding more historical draws.</div>`;
+    return;
+  }
+  holder.innerHTML = `<div class="hint" style="margin-bottom:8px;">Top ${labels[size]} across ${totalDraws} draw${totalDraws!==1?'s':''}:</div>` +
+    ranked.map(([key,count],i)=>{
+      const balls = key.split(',').map(n=>`<div class="ball">${n}</div>`).join('');
+      const pct = totalDraws>0 ? Math.round((count/totalDraws)*1000)/10 : 0;
+      const ls = lastSeen && lastSeen[key]!=null ? (lastSeen[key]===0 ? 'most recent draw' : `${lastSeen[key]} draw${lastSeen[key]!==1?'s':''} ago`) : '—';
+      return `<div class="combo-row"><span class="combo-rank">#${i+1}</span>${balls}<span class="combo-count">${count}× (${pct}%)</span><span class="combo-meta">Last seen: ${ls}</span></div>`;
+    }).join('');
+}
+
+/* =========================================================
+   NUMBER FREQUENCY & RANGE STATS
+   ========================================================= */
+function getGamePoolSize(){ return 52; }
+function getGameBands(){ return [[1,9],[10,19],[20,29],[30,39],[40,52]]; }
+function computeFrequencyStats(){
+  const draws = historicalData[activeHistTab] || [];
+  const pool = getGamePoolSize();
+  const total = draws.length;
+  const picksPerDraw = draws.length ? draws[0].main.length : 6;
+  const totalSlots = total * picksPerDraw;
+  const stats = [];
+  for(let n=1;n<=pool;n++){
+    let count=0, lastSeen=null;
+    draws.forEach((d,idx)=>{
+      if(d.main.includes(n)){ count++; if(lastSeen===null) lastSeen=idx; }
+    });
+    stats.push({ n, count, pct: totalSlots>0 ? (count/totalSlots*100) : 0, lastSeen });
+  }
+  return { stats, total };
+}
+function renderFrequencyGrid(){
+  const { stats, total } = computeFrequencyStats();
+  const gridEl = document.getElementById('freqGrid');
+  const statsEl = document.getElementById('freqRangeStats');
+  const noteEl = document.getElementById('freqEmptyNote');
+  if(total===0){
+    gridEl.innerHTML = '';
+    statsEl.innerHTML = '';
+    noteEl.textContent = 'No historical draws for this game yet — add some in Historical Draws first.';
+    return;
+  }
+  const sumPct = stats.reduce((s,x)=>s+x.pct,0);
+  noteEl.textContent = `Based on ${total} draw${total!==1?'s':''}. All ${stats.length} percentages sum to ${sumPct.toFixed(0)}%.`;
+  const maxPct = Math.max(...stats.map(s=>s.pct), 0.0001);
+  gridEl.innerHTML = stats.map(s=>{
+    let cls = 'freq-cell';
+    if(s.count===0) cls += ' freq-none';
+    else if(s.pct >= maxPct*0.75) cls += ' freq-hot';
+    else if(s.pct <= maxPct*0.25) cls += ' freq-cold';
+    const lastSeenLabel = s.lastSeen===null ? '—' : (s.lastSeen===0 ? 'now' : s.lastSeen+'ago');
+    return `<div class="${cls}" title="Last seen: ${s.lastSeen===null?'never':(s.lastSeen===0?'most recent draw':s.lastSeen+' draws ago')}">
+      <div class="fn">${s.n}</div>
+      <div class="fp">${s.pct.toFixed(1)}%</div>
+    </div>`;
+  }).join('');
+  const bands = getGameBands();
+  statsEl.innerHTML = bands.map(([lo,hi])=>{
+    const inRange = stats.filter(s=>s.n>=lo && s.n<=hi);
+    const sum = inRange.reduce((sum,s)=>sum+s.pct,0);
+    return `<div class="stats-box"><div class="sv">${sum.toFixed(0)}%</div><div class="sl">${lo}–${hi}</div></div>`;
+  }).join('');
+}
+
+function useHistDrawInChecker(i){
+  const s = historicalData[activeHistTab][i];
+  if(!s || s.bonus==null) return;
+  const all = [...s.main, s.bonus];
+  for(let k=0;k<7;k++) document.getElementById('draw'+k).value = all[k];
+  checkMatches();
+  document.getElementById('drawInputs').scrollIntoView({behavior:'smooth', block:'center'});
+}
+function toggleHistVT(key){
+  if(activeHistVT.has(key)) activeHistVT.delete(key); else activeHistVT.add(key);
+  document.querySelectorAll('#histToggleRow .vt-btn, #histBandRow .vt-btn').forEach(b=>b.classList.toggle('active', activeHistVT.has(b.dataset.vt)));
+  applyHistViewToggles();
+}
+function applyHistViewToggles(){
+  const scope = document.getElementById('histList');
+  scope.querySelectorAll('.ball').forEach(b=>b.classList.remove('vt-lower','vt-upper','vt-odd','vt-even','vt-c2','vt-c3','vt-c4','vt-b1','vt-b2','vt-b3','vt-b4','vt-b5'));
+  if(activeHistVT.size===0) return;
+  const list = historicalData[activeHistTab];
+  list.forEach((s,i)=>{
+    const sorted = [...s.main].sort((a,b)=>a-b);
+    const runs = findClusters(sorted);
+    runs.forEach(run=>{
+      let cls=null;
+      if(run.length>=4 && activeHistVT.has('c4')) cls='vt-c4';
+      else if(run.length===3 && activeHistVT.has('c3')) cls='vt-c3';
+      else if(run.length===2 && activeHistVT.has('c2')) cls='vt-c2';
+      if(cls) run.forEach(n=>{
+        const el = scope.querySelector(`.ball[data-set="${i}"][data-n="${n}"]`);
+        if(el) el.classList.add(cls);
+      });
+    });
+  });
+  scope.querySelectorAll('.ball').forEach(el=>{
+    if(el.classList.contains('vt-c2')||el.classList.contains('vt-c3')||el.classList.contains('vt-c4')) return;
+    const n = +el.dataset.n;
+    let bandCls = null;
+    if(activeHistVT.has('b1') && n>=1 && n<=9) bandCls='vt-b1';
+    else if(activeHistVT.has('b2') && n>=10 && n<=19) bandCls='vt-b2';
+    else if(activeHistVT.has('b3') && n>=20 && n<=29) bandCls='vt-b3';
+    else if(activeHistVT.has('b4') && n>=30 && n<=39) bandCls='vt-b4';
+    else if(activeHistVT.has('b5') && n>=40 && n<=52) bandCls='vt-b5';
+    if(bandCls){ el.classList.add(bandCls); return; }
+    if(activeHistVT.has('odd') && n%2!==0) el.classList.add('vt-odd');
+    else if(activeHistVT.has('even') && n%2===0) el.classList.add('vt-even');
+    else if(activeHistVT.has('lower') && n<=26) el.classList.add('vt-lower');
+    else if(activeHistVT.has('upper') && n>26) el.classList.add('vt-upper');
+  });
+}
+
+/* =========================================================
+   PATTERN GRID (5x7) + STATS
+   ========================================================= */
+let patternGrid = Array.from({length:5},()=>Array(7).fill(''));
+const MAX_GRID_ROWS = 10;
+
+function renderPatternGrid(){
+  const holder = document.getElementById('patternGridHolder');
+  holder.innerHTML = patternGrid.map((row,r)=>
+    `<div class="grid7-row"><span class="row-tag">R${r+1}</span>${row.map((v,c)=>
+      `<input type="number" min="1" max="52" value="${v}" onchange="updatePatternCell(${r},${c},this.value)">`).join('')}<button class="row-rm" onclick="removePatternRow(${r})" title="Remove row">✕</button></div>`
+  ).join('');
+  document.getElementById('patternGridTitleCount').textContent = `(${patternGrid.length}×7)`;
+  renderPatternStats();
+}
+function addPatternRow(){
+  if(patternGrid.length>=MAX_GRID_ROWS){ alert('Maximum 10 rows.'); return; }
+  patternGrid.push(Array(7).fill(''));
+  renderPatternGrid();
+}
+function removePatternRow(r){
+  if(patternGrid.length<=1){ alert('At least one row is required.'); return; }
+  patternGrid.splice(r,1);
+  renderPatternGrid();
+}
+function updatePatternCell(r,c,val){
+  patternGrid[r][c] = val==='' ? '' : Math.max(1,Math.min(52,+val));
+  renderPatternStats();
+}
+function renderPatternStats(){
+  const nums = patternGrid.flat().filter(n=>n!=='' && n!=null).map(Number);
+  const odd = nums.filter(n=>n%2!==0).length;
+  const even = nums.filter(n=>n%2===0).length;
+  const lower = nums.filter(n=>n<=26), upper = nums.filter(n=>n>26);
+  const lowerRange = lower.length ? `${Math.min(...lower)}–${Math.max(...lower)}` : '—';
+  const upperRange = upper.length ? `${Math.min(...upper)}–${Math.max(...upper)}` : '—';
+  document.getElementById('patternStats').innerHTML = `
+    <div class="stats-box"><div class="sv">${odd}</div><div class="sl">Odd</div></div>
+    <div class="stats-box"><div class="sv">${even}</div><div class="sl">Even</div></div>
+    <div class="stats-box"><div class="sv">${lowerRange}</div><div class="sl">1st Half Start–Finish</div></div>
+    <div class="stats-box"><div class="sv">${upperRange}</div><div class="sl">2nd Half Start–Finish</div></div>`;
+}
+function clearPatternGrid(){
+  patternGrid = Array.from({length:5},()=>Array(7).fill(''));
+  renderPatternGrid();
+}
+
+/* =========================================================
+   GENERIC GRID PASTE / FILE / CLIPBOARD HELPERS
+   ========================================================= */
+async function pasteToGrid(textareaId){
+  try{
+    const text = await navigator.clipboard.readText();
+    const ta = document.getElementById(textareaId);
+    ta.value = ta.value ? ta.value+'\n'+text : text;
+  }catch(e){
+    alert('Clipboard access was blocked by the browser. Long-press the text box and paste manually instead.');
+  }
+}
+function handleGenericFileUpload(event, textareaId){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{ document.getElementById(textareaId).value = e.target.result; };
+  reader.readAsText(file);
+  event.target.value='';
+}
+function fillGridFromText(textareaId, gridRef, renderFn, autoGrow){
+  const text = document.getElementById(textareaId).value.trim();
+  if(!text){ alert('Paste or type numbers first.'); return; }
+  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+  if(autoGrow){
+    while(gridRef.length < Math.min(lines.length, MAX_GRID_ROWS)) gridRef.push(Array(7).fill(''));
+  }
+  lines.forEach((line,r)=>{
+    if(r>=gridRef.length) return;
+    const nums = line.split(/[,\s]+/).map(s=>+s.trim()).filter(n=>n>=1 && n<=52);
+    for(let c=0;c<7;c++) gridRef[r][c] = nums[c] ?? '';
+  });
+  document.getElementById(textareaId).value='';
+  renderFn();
+}
+function copyGridToClipboard(gridRef, labels){
+  const text = gridRef.map((row,i)=>{
+    const prefix = labels ? (labels[i]+': ') : '';
+    return prefix + row.filter(n=>n!=='' && n!=null).join(', ');
+  }).join('\n');
+  navigator.clipboard.writeText(text).then(()=>alert('Copied to clipboard.')).catch(()=>{
+    prompt('Copy this text manually:', text);
+  });
+}
+
+/* =========================================================
+   LATEST DRAWS SNAPSHOT (3x7)
+   ========================================================= */
+function renderLatestDraws(){
+  const holder = document.getElementById('latestDrawsHolder');
+  holder.innerHTML = Object.keys(HIST_TAB_LABELS).map(key=>{
+    const d = historicalData[key][0];
+    const cells = d
+      ? [...d.main, ...(d.bonus!=null?[d.bonus]:[])].map(n=>`<div class="ball">${n}</div>`).join('')
+      : '<span class="hint">No draws stored yet</span>';
+    return `<div class="grid7-row"><span class="row-tag">${HIST_TAB_LABELS[key].slice(0,3)}</span>${cells}</div>`;
+  }).join('');
+}
+function copyLatestDraws(){
+  const text = Object.keys(HIST_TAB_LABELS).map(key=>{
+    const d = historicalData[key][0];
+    if(!d) return HIST_TAB_LABELS[key]+': —';
+    return HIST_TAB_LABELS[key]+': '+[...d.main, ...(d.bonus!=null?[d.bonus]:[])].join(', ');
+  }).join('\n');
+  navigator.clipboard.writeText(text).then(()=>alert('Copied to clipboard.')).catch(()=>{
+    prompt('Copy this text manually:', text);
+  });
+}
+
+/* =========================================================
+   HOT / COLD / PREDICTIONS GRID (dynamic, up to 10x7)
+   ========================================================= */
+let hotColdGrid = {
+  labels: ['Hot Numbers','Cold Numbers','Prediction A','Prediction B'],
+  rows: Array.from({length:4},()=>Array(7).fill(''))
+};
+const PRED_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+function nextPredictionLabel(){
+  const predCount = Math.max(0, hotColdGrid.rows.length - 2);
+  return 'Prediction ' + (PRED_LETTERS[predCount] || (predCount+1));
+}
+function renderHotColdGrid(){
+  const holder = document.getElementById('hotColdHolder');
+  holder.innerHTML = hotColdGrid.rows.map((row,r)=>`
+    <div style="display:flex;gap:4px;align-items:center;margin-bottom:3px;">
+      <input class="row-label-input" style="margin-bottom:0;" value="${hotColdGrid.labels[r]}" onchange="updateHotColdLabel(${r},this.value)">
+      <button class="row-rm" onclick="removeHotColdRow(${r})" title="Remove row">✕</button>
+    </div>
+    <div class="grid7-row"><span class="row-tag">R${r+1}</span>${row.map((v,c)=>
+      `<input type="number" min="1" max="52" value="${v}" onchange="updateHotColdCell(${r},${c},this.value)">`).join('')}<span></span></div>
+  `).join('');
+  document.getElementById('hotColdTitleCount').textContent = `(${hotColdGrid.rows.length}×7)`;
+}
+function addHotColdRow(){
+  if(hotColdGrid.rows.length>=MAX_GRID_ROWS){ alert('Maximum 10 rows.'); return; }
+  hotColdGrid.rows.push(Array(7).fill(''));
+  hotColdGrid.labels.push(nextPredictionLabel());
+  renderHotColdGrid();
+}
+function removeHotColdRow(r){
+  if(hotColdGrid.rows.length<=1){ alert('At least one row is required.'); return; }
+  hotColdGrid.rows.splice(r,1);
+  hotColdGrid.labels.splice(r,1);
+  renderHotColdGrid();
+}
+function updateHotColdLabel(r,val){ hotColdGrid.labels[r] = val; }
+function updateHotColdCell(r,c,val){
+  hotColdGrid.rows[r][c] = val==='' ? '' : Math.max(1,Math.min(52,+val));
+}
+function clearHotColdGrid(){
+  hotColdGrid.rows = Array.from({length:4},()=>Array(7).fill(''));
+  hotColdGrid.labels = ['Hot Numbers','Cold Numbers','Prediction A','Prediction B'];
+  renderHotColdGrid();
+}
+function loadHotColdSnapshot(){
+  // Snapshot pulled from za.national-lottery.com on request — reflects that source's
+  // cached data (last-drawn dates around early Jan 2026), not necessarily today's live stats.
+  // Note: SA Lotto's pool officially expanded to 1-58 in Sep 2025; this app still targets
+  // 1-52, so the value 58 is included as-is but exceeds this app's current pool cap.
+  hotColdGrid.labels[0] = 'Hot Numbers';
+  hotColdGrid.labels[1] = 'Cold Numbers';
+  hotColdGrid.rows[0] = [58,33,8,32,56,'',''];
+  hotColdGrid.rows[1] = [3,28,57,2,38,'',''];
+  renderHotColdGrid();
+  document.getElementById('saveStatus').textContent =
+    'Hot/Cold snapshot loaded (source dated ~early Jan 2026 — verify against latest results).';
+}
+
+/* =========================================================
+   DRAWING / ANNOTATION TOOL
+   ========================================================= */
+const drawColors = ['#ffffff','#ffcc33','#ff2ec4','#00e5ff','#33d17a','#ff5470','#ff7a00','#a259ff'];
+let currentTool='pen', currentColor=drawColors[1], drawing=false, startX=0, startY=0, snapshot=null;
+let dctx=null, dcanvas=null;
+
+function setTool(tool){
+  currentTool = tool;
+  document.querySelectorAll('#drawToolbar button').forEach(b=>b.classList.toggle('active', b.dataset.tool===tool));
+}
+function renderColorRow(){
+  const row = document.getElementById('colorRow');
+  row.innerHTML='';
+  drawColors.forEach(c=>{
+    const sw = document.createElement('div');
+    sw.className='color-swatch'+(c===currentColor?' active':'');
+    sw.style.background=c;
+    sw.onclick=()=>{ currentColor=c; renderColorRow(); };
+    row.appendChild(sw);
+  });
+}
+function getPos(e){
+  const rect = dcanvas.getBoundingClientRect();
+  const scaleX = dcanvas.width/rect.width, scaleY = dcanvas.height/rect.height;
+  const p = e.touches ? e.touches[0] : e;
+  return {x:(p.clientX-rect.left)*scaleX, y:(p.clientY-rect.top)*scaleY};
+}
+function setupDrawing(){
+  dcanvas = document.getElementById('drawCanvas');
+  dctx = dcanvas.getContext('2d');
+  dctx.fillStyle = '#0a0a0a';
+  dctx.fillRect(0,0,dcanvas.width,dcanvas.height);
+
+  const start = e=>{
+    e.preventDefault();
+    drawing = true;
+    const p = getPos(e);
+    startX=p.x; startY=p.y;
+    snapshot = dctx.getImageData(0,0,dcanvas.width,dcanvas.height);
+    if(currentTool==='pen'||currentTool==='highlighter'){
+      dctx.beginPath();
+      dctx.moveTo(p.x,p.y);
+    }
+  };
+  const move = e=>{
+    if(!drawing) return;
+    e.preventDefault();
+    const p = getPos(e);
+    const size = +document.getElementById('brushSize').value;
+    if(currentTool==='pen'){
+      dctx.globalAlpha=1; dctx.strokeStyle=currentColor; dctx.lineWidth=size;
+      dctx.lineCap='round'; dctx.lineJoin='round';
+      dctx.lineTo(p.x,p.y); dctx.stroke();
+    } else if(currentTool==='highlighter'){
+      dctx.globalAlpha=0.35; dctx.strokeStyle=currentColor; dctx.lineWidth=size*3;
+      dctx.lineCap='round'; dctx.lineJoin='round';
+      dctx.lineTo(p.x,p.y); dctx.stroke();
+      dctx.globalAlpha=1;
+    } else if(currentTool==='circle' || currentTool==='square'){
+      dctx.putImageData(snapshot,0,0);
+      dctx.globalAlpha=1; dctx.strokeStyle=currentColor; dctx.lineWidth=+document.getElementById('brushSize').value;
+      dctx.beginPath();
+      if(currentTool==='circle'){
+        const rx=(p.x-startX)/2, ry=(p.y-startY)/2;
+        dctx.ellipse(startX+rx, startY+ry, Math.abs(rx), Math.abs(ry), 0, 0, Math.PI*2);
+      } else {
+        dctx.rect(startX, startY, p.x-startX, p.y-startY);
+      }
+      dctx.stroke();
+    }
+  };
+  const end = e=>{ drawing=false; };
+
+  dcanvas.addEventListener('pointerdown', start);
+  dcanvas.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', end);
+}
+function loadImageToCanvas(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const img = new Image();
+    img.onload = ()=>{
+      dctx.clearRect(0,0,dcanvas.width,dcanvas.height);
+      dctx.fillStyle='#0a0a0a'; dctx.fillRect(0,0,dcanvas.width,dcanvas.height);
+      // fit image within canvas, preserving aspect ratio
+      const scale = Math.min(dcanvas.width/img.width, dcanvas.height/img.height);
+      const w = img.width*scale, h = img.height*scale;
+      dctx.drawImage(img, (dcanvas.width-w)/2, (dcanvas.height-h)/2, w, h);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value='';
+}
+function clearCanvas(){
+  dctx.clearRect(0,0,dcanvas.width,dcanvas.height);
+  dctx.fillStyle='#0a0a0a'; dctx.fillRect(0,0,dcanvas.width,dcanvas.height);
+}
+function downloadCanvas(){
+  const link = document.createElement('a');
+  link.download = 'devsoft-annotation.png';
+  link.href = dcanvas.toDataURL('image/png');
+  link.click();
+}
+function toggleDrawCollapse(){
+  const body = document.getElementById('drawCollapseBody');
+  const btn = document.getElementById('drawCollapseBtn');
+  const open = body.classList.toggle('open');
+  btn.textContent = open ? 'Hide ▴' : 'Show ▾';
+}
+
+/* =========================================================
+   CAPTURE ANY SECTION INTO THE DRAWING TOOL
+   ========================================================= */
+function injectCaptureButtons(){
+  document.querySelectorAll('.card').forEach(card=>{
+    if(card.querySelector('#drawCanvasWrap')) return; // skip the drawing card itself
+    const title = card.querySelector('.card-title');
+    if(!title || title.querySelector('.capture-btn')) return;
+    const btn = document.createElement('button');
+    btn.className = 'capture-btn';
+    btn.title = 'Capture this section for annotation';
+    btn.textContent = '📸';
+    btn.onclick = (e)=>{ e.stopPropagation(); captureSectionToCanvas(card); };
+    title.appendChild(btn);
+  });
+}
+async function captureSectionToCanvas(cardEl){
+  if(typeof html2canvas === 'undefined'){
+    alert('The screenshot library didn\'t load — check your internet connection and try again.');
+    return;
+  }
+  const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0d0f14';
+  try{
+    const snap = await html2canvas(cardEl, {backgroundColor: bg, scale: 2});
+    dctx.clearRect(0,0,dcanvas.width,dcanvas.height);
+    dctx.fillStyle = bg; dctx.fillRect(0,0,dcanvas.width,dcanvas.height);
+    const scale = Math.min(dcanvas.width/snap.width, dcanvas.height/snap.height);
+    const w = snap.width*scale, h = snap.height*scale;
+    dctx.drawImage(snap, (dcanvas.width-w)/2, (dcanvas.height-h)/2, w, h);
+    const body = document.getElementById('drawCollapseBody');
+    if(body && !body.classList.contains('open')) toggleDrawCollapse();
+    document.getElementById('drawCanvasWrap').scrollIntoView({behavior:'smooth', block:'center'});
+  }catch(err){
+    alert('Could not capture that section: ' + err.message);
+  }
+}
+
+/* =========================================================
+   ZOOM CONTROL
+   ========================================================= */
+let zoomLevel = 1;
+function applyZoom(){
+  zoomLevel = Math.max(0.7, Math.min(1.8, zoomLevel));
+  document.body.style.zoom = zoomLevel;
+  document.getElementById('zoomLevel').textContent = Math.round(zoomLevel*100)+'%';
+  localStorage.setItem('devsoft-zoom', zoomLevel);
+}
+function adjustZoom(delta){
+  zoomLevel += delta;
+  applyZoom();
+}
+function resetZoom(){
+  zoomLevel = 1;
+  applyZoom();
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+/* =========================================================
+   SAVE / LOAD — full app backup, like an Excel workbook,
+   plus automatic local persistence so work survives closing the app
+   ========================================================= */
+const AUTOSAVE_KEY = 'devsoft_lotto_autosave';
+
+function buildSavePayload(){
+  gameStates[activeGame] = snapshotCurrentGameState();
+  return {
+    app: 'devsoft-lotto', version: 3, savedAt: new Date().toISOString(),
+    activeGame, gameStates, historicalData, gridTally,
+    currentThemeId, zoomLevel
+  };
+}
+function restoreFromPayload(data){
+  if(data.gameStates){
+    // current format: separate state per game
+    gameStates = data.gameStates;
+    activeGame = data.activeGame || 'salotto';
+    if(!gameStates[activeGame]) gameStates[activeGame] = freshGameState();
+    loadGameStateVars(gameStates[activeGame]);
+    document.querySelectorAll('#gameSeg button').forEach(b=>b.classList.toggle('active', b.dataset.game===activeGame));
+  } else if(data.bandGroups && data.bandGroups.length){
+    // backward compatibility: single shared band-group save (pre-per-game version)
+    bandGroups = data.bandGroups;
+    activeGroupIndex = Math.min(data.activeGroupIndex||0, bandGroups.length-1);
+    if(data.generatedSets) generatedSets = data.generatedSets;
+    if(data.patternGrid) patternGrid = data.patternGrid;
+    if(data.hotColdGrid) hotColdGrid = data.hotColdGrid;
+    gameStates.salotto = snapshotCurrentGameState();
+  } else if(data.bands){
+    // even older backward compatibility: single flat bands array
+    bandGroups = [{ name:'Group 1', bands: data.bands }];
+    activeGroupIndex = 0;
+    if(data.generatedSets) generatedSets = data.generatedSets;
+    gameStates.salotto = snapshotCurrentGameState();
+  }
+  if(bandGroups.length){
+    const allGroups = Object.values(gameStates).filter(Boolean).flatMap(s=>s.bandGroups||[]);
+    const maxId = Math.max(0, ...allGroups.flatMap(g=>g.bands.map(b=>+String(b.id).replace('band','')||0)));
+    bandCount = maxId;
+  }
+  if(data.historicalData) historicalData = data.historicalData;
+  backfillMissingDates();
+  if(data.gridTally) gridTally = data.gridTally;
+  if(data.zoomLevel) zoomLevel = data.zoomLevel;
+
+  renderGroupTabs();
+  renderBands();
+  renderSets();
+  renderHistList();
+  renderNumGrid();
+  renderPatternGrid();
+  renderHotColdGrid();
+  renderSpendLedger();
+  applyZoom();
+  if(data.currentThemeId){
+    const all = [...THEMES.neon, ...THEMES.modern];
+    const t = all.find(x=>x.id===data.currentThemeId);
+    if(t) applyTheme(t);
+  }
+}
+
+// Explicit "Save Progress" button — saves locally, no file dialog
+function saveProgress(){
+  try{
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(buildSavePayload()));
+    document.getElementById('saveStatus').textContent =
+      'Progress saved — it will be here next time you open this file, on this device.';
+  }catch(e){
+    alert('Could not save locally (device storage may be full or blocked).');
+  }
+}
+// Silent autosave, e.g. on page close, so work isn't lost even if the button wasn't tapped
+function silentAutosave(){
+  try{ localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(buildSavePayload())); }catch(e){}
+}
+function loadAutosaveOnStart(){
+  try{
+    const raw = localStorage.getItem(AUTOSAVE_KEY);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    restoreFromPayload(data);
+    document.getElementById('saveStatus').textContent =
+      'Restored your saved progress from ' + new Date(data.savedAt).toLocaleString();
+  }catch(e){ /* ignore corrupt/missing autosave */ }
+}
+window.addEventListener('beforeunload', silentAutosave);
+window.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') silentAutosave(); });
+
+// Downloadable backup file (for transferring between devices or keeping dated copies)
+function saveWork(){
+  const payload = buildSavePayload();
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,10);
+  link.href = url;
+  link.download = `devsoft-lotto-save-${stamp}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+  document.getElementById('saveStatus').textContent = 'Backup downloaded at ' + new Date().toLocaleTimeString();
+}
+function loadWork(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const data = JSON.parse(e.target.result);
+      restoreFromPayload(data);
+      document.getElementById('saveStatus').textContent = 'Loaded backup from ' + new Date(data.savedAt).toLocaleString();
+    }catch(err){
+      alert('Could not read that file — make sure it is a .json file saved from this app.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+function seedDefaultBandGroups(){
+  bandGroups = [];
+  activeGroupIndex = 0;
+  // LOWER group: bias toward smaller numbers within each decade
+  bandGroups.push({ name:'Lower', bands:[
+    makeBand(1,9,   1,1,0),   // 2 numbers: 1 odd, 1 even
+    makeBand(10,19, 1,1,0),   // 2 numbers: 1 odd, 1 even
+    makeBand(20,29, 1,1,0),   // 2 numbers: 1 odd, 1 even
+    makeBand(30,39, 0,0,1),   // 1 number, any parity
+    makeBand(40,52, 0,0,0)    // left blank — tweak as you like
+  ]});
+  // UPPER group: bias toward larger numbers within each decade
+  bandGroups.push({ name:'Upper', bands:[
+    makeBand(1,9,   0,0,1),   // 1 number, any parity
+    makeBand(10,19, 0,0,1),   // 1 number, any parity
+    makeBand(20,29, 0,0,1),   // 1 number, any parity
+    makeBand(30,39, 0,0,2),   // 2 numbers, any parity
+    makeBand(40,52, 0,0,2)    // 2 numbers, any parity
+  ]});
+  renderGroupTabs();
+  renderBands();
+}
+
+function init(){
+  renderDrawInputs();
+  seedDefaultBandGroups();
+  gameStates.salotto = snapshotCurrentGameState();
+  renderBiasGrids();
+  const saved = localStorage.getItem('devsoft-theme');
+  const all = [...THEMES.neon, ...THEMES.modern];
+  const t = all.find(x=>x.id===saved) || THEMES.neon[0];
+  applyTheme(t);
+  renderNumGrid();
+  renderHistList();
+  renderColorRow();
+  setupDrawing();
+  renderPatternGrid();
+  renderLatestDraws();
+  renderHotColdGrid();
+  renderSheetView();
+  renderSpendLedger();
+  renderFrequencyGrid();
+  const savedZoom = parseFloat(localStorage.getItem('devsoft-zoom'));
+  if(savedZoom) zoomLevel = savedZoom;
+  applyZoom();
+  loadAutosaveOnStart();
+  injectCaptureButtons();
+}
+init();
+</script>
+</body>
+</html>
